@@ -19,11 +19,13 @@
     font-size: 2em;
     margin-bottom: 20px;
     color: #333;
+    text-align: center;
+
 }
 
 .action-buttons {
     display: flex;
-    justify-content: space-between;
+    justify-content:space-around;
     margin: 20px 0;
 }
 
@@ -43,7 +45,7 @@
 }
 
 .recent-alerts {
-    margin-top: 20px;
+    margin-top: 7%;
 }
 
 .recent-alerts h2 {

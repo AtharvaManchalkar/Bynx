@@ -1,0 +1,33 @@
+.summary-metrics {
+    padding: 20px;
+    text-align: center;
+}
+
+.metrics-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.metric {
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    padding: 20px;
+    width: 120px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.metric h3 {
+    font-size: 16px;
+    margin: 0;
+    color: #555;
+}
+
+.metric p {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 8px;
+    color: #333;
+}

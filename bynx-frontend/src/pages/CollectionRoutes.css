@@ -1,0 +1,92 @@
+.collection-routes {
+    padding: 20px;
+}
+
+.collection-routes h1 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.main-content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.map-section {
+    width: 60%;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.map-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.map-placeholder {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e0e0e0;
+    border: 1px dashed #aaa;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.legend {
+    margin-top: 10px;
+}
+
+.legend h3 {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+}
+
+.control-panel {
+    width: 35%;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.control-panel h2 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.control-button {
+    margin: 10px 0;
+    padding: 8px 12px;
+    font-size: 1rem;
+    color: white;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.control-button:hover {
+    background-color: #45a049;
+}
+
+.toggle {
+    margin-top: 15px;
+    font-size: 1rem;
+}
+
+.toggle label {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-label {
+    margin-left: 8px;
+    font-weight: bold;
+    color: #333;
+}

@@ -1,0 +1,81 @@
+.complaints-maintenance {
+    padding: 20px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.add-button {
+    font-style: italic;
+    background: transparent;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+}
+
+.add-button:hover {
+    color: #0056b3;
+}
+
+.complaints-table, .maintenance-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.complaints-table th, .maintenance-table th,
+.complaints-table td, .maintenance-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.mark-resolved-button {
+    background-color: #28a745;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.mark-resolved-button:hover {
+    background-color: #218838;
+}
+
+.resolved-status {
+    color: #6c757d;
+    font-weight: bold;
+}
+
+.complaint-form, .maintenance-form {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+.complaint-form input,
+.maintenance-form input {
+    padding: 8px;
+    margin-right: 10px;
+    flex: 1;
+}
+
+.complaint-form button,
+.maintenance-form button {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.complaint-form button:hover,
+.maintenance-form button:hover {
+    background-color: #0056b3;
+}

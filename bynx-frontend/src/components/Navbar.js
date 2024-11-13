@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
@@ -6,6 +5,7 @@ import './Navbar.css';
 const Navbar = () => {
   return (
     <nav>
+      <div className="navbar-title">BYNX</div>
       <ul>
         <li><Link to="/">Home</Link></li>
         <li><Link to="/bin-management">Bin Management</Link></li>
