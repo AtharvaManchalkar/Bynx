@@ -31,3 +31,27 @@
     margin-top: 8px;
     color: #333;
 }
+
+@media (max-width: 768px) {
+    .summary-metrics {
+        padding: 10px;
+    }
+
+    .metrics-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .metric {
+        width: 93%;
+        padding: 15px;
+    }
+
+    .metric h3 {
+        font-size: 14px;
+    }
+
+    .metric p {
+        font-size: 18px;
+    }
+}

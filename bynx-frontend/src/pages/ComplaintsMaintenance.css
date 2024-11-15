@@ -79,3 +79,42 @@
 .maintenance-form button:hover {
     background-color: #0056b3;
 }
+
+@media (max-width: 768px) {
+    .complaints-maintenance {
+        padding: 10px;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .add-button {
+        margin-top: 10px;
+    }
+
+    .complaints-table, .maintenance-table {
+        font-size: 14px;
+    }
+
+    .complaints-table th, .maintenance-table th,
+    .complaints-table td, .maintenance-table td {
+        padding: 5px;
+    }
+
+    .complaint-form, .maintenance-form {
+        flex-direction: column;
+    }
+
+    .complaint-form input,
+    .maintenance-form input {
+        margin-bottom: 10px;
+        margin-right: 0;
+    }
+
+    .complaint-form button,
+    .maintenance-form button {
+        width: 100%;
+    }
+}

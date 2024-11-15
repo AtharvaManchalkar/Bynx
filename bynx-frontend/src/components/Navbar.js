@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar = () => {
+  const [isActive, setIsActive] = useState(false);
+
+  const handleToggle = () => {
+    setIsActive(!isActive);
+  };
+
   return (
-    <nav>
-      <div className="navbar-title">BYNX</div>
+    <nav className={isActive ? 'active' : ''}>
+      <div className="navbar-title" onClick={handleToggle}>
+        BYNX
+      </div>
       <ul>
         <li><Link to="/">Home</Link></li>
         <li><Link to="/bin-management">Bin Management</Link></li>

@@ -11,19 +11,24 @@
 .filter-section {
     display: flex;
     align-items: center;
+    gap: 10px;
     margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 .filter-section label {
     font-weight: bold;
     margin-right: 10px;
+    white-space: nowrap;
 }
 
 .date-input {
     padding: 5px 10px;
-    margin: 0 10px;
     border-radius: 4px;
     border: 1px solid #ccc;
+    font-size: 14px;
+    flex: 1;
+    min-width: 120px;
 }
 
 .apply-filter-btn {
@@ -33,6 +38,7 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .apply-filter-btn:hover {
@@ -111,3 +117,47 @@
 .export-btn:hover {
     opacity: 0.8;
 }
+
+@media (max-width: 768px) {
+    .filter-section {
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        gap: 5px;
+        font-size: 13px; 
+        width:93%;
+    }
+
+    .date-input {
+        width: 25%;
+        padding: 2px 2px;
+    }
+
+    .apply-filter-btn {
+        font-size: 13px;
+        padding: 3px 10px;
+    }
+
+    .date-input {
+        margin: 10px 0;
+    }
+
+    .graphs-section {
+        flex-direction: column;
+    }
+
+    .graph {
+        width: 93%;
+        margin-bottom: 20px;
+    }
+
+    .summary-cards {
+        flex-direction: column;
+    }
+
+    .card {
+        width: 93%;
+        margin-bottom: 20px;
+    }
+
+}
+

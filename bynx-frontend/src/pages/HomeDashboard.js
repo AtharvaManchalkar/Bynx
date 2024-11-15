@@ -1,14 +1,12 @@
 // src/pages/HomeDashboard.js
 import React from 'react';
-// import Navbar from '../components/Navbar';
 import SummaryMetrics from '../components/SummaryMetrics';
-import './HomeDashboard.css';  // Ensure this file exists for any specific styling
+import './HomeDashboard.css';
 
 const HomeDashboard = () => {
   return (
   
     <div className="home-dashboard">
-       {/* <Navbar /> */}
        <div className="dashboard-content">
          <h1 className="dashboard-title">Waste Management Dashboard</h1>
 

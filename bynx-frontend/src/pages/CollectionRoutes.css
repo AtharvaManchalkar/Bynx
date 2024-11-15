@@ -90,3 +90,24 @@
     font-weight: bold;
     color: #333;
 }
+
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .map-section, .control-panel {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .map-placeholder {
+        height: 200px;
+    }
+
+    .control-button {
+        width: 100%;
+        text-align: center;
+    }
+}
