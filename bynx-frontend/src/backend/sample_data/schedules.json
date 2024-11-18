@@ -1,0 +1,15 @@
+[
+    {
+      "schedule_id": "S001",
+      "route_id": "R001",
+      "date": "2024-11-17T08:00:00Z",
+      "worker_assigned": "Michael Brown"
+    },
+    {
+      "schedule_id": "S002",
+      "route_id": "R002",
+      "date": "2024-11-18T08:00:00Z",
+      "worker_assigned": "Emily Davis"
+    }
+  ]
+  

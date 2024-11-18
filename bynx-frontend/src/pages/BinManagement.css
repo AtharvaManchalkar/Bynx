@@ -132,8 +132,8 @@
 
     .search-bar {
         width: 60%;
-        padding: 6px;
-        font-size: 13px;
+        padding: 8px 6px;
+        font-size: 14px;
     }
 
     .search-button {

@@ -1,0 +1,63 @@
+[
+    {
+      "bin_id": "B001",
+      "location": "Sector 5, Downtown",
+      "status": "Full",
+      "last_cleaned_at": "2024-11-16T08:00:00Z"
+    },
+    {
+      "bin_id": "B002",
+      "location": "Sector 8, Uptown",
+      "status": "Empty",
+      "last_cleaned_at": "2024-11-15T09:30:00Z"
+    },
+    {
+      "bin_id": "B003",
+      "location": "Main Street",
+      "status": "Half Full",
+      "last_cleaned_at": "2024-11-15T10:00:00Z"
+    },
+    {
+      "bin_id": "B004",
+      "location": "Central Park",
+      "status": "Overflowing",
+      "last_cleaned_at": "2024-11-14T12:45:00Z"
+    },
+    {
+      "bin_id": "B005",
+      "location": "Sector 11, Midtown",
+      "status": "Empty",
+      "last_cleaned_at": "2024-11-13T08:30:00Z"
+    },
+    {
+      "bin_id": "B006",
+      "location": "Sector 3, East Side",
+      "status": "Half Full",
+      "last_cleaned_at": "2024-11-12T09:15:00Z"
+    },
+    {
+      "bin_id": "B007",
+      "location": "Sector 7, South Side",
+      "status": "Full",
+      "last_cleaned_at": "2024-11-12T10:45:00Z"
+    },
+    {
+      "bin_id": "B008",
+      "location": "Sector 2, North Side",
+      "status": "Empty",
+      "last_cleaned_at": "2024-11-11T07:30:00Z"
+    },
+    {
+      "bin_id": "B009",
+      "location": "Market Road",
+      "status": "Overflowing",
+      "last_cleaned_at": "2024-11-10T11:50:00Z"
+    },
+    {
+      "bin_id": "B010",
+      "location": "Sector 12, West End",
+      "status": "Half Full",
+      "last_cleaned_at": "2024-11-09T14:10:00Z"
+    }
+  ]
+  

@@ -1,0 +1,17 @@
+[
+    {
+      "maintenance_id": "M001",
+      "bin_id": "B004",
+      "issue": "Cracked bin structure",
+      "status": "Pending",
+      "reported_at": "2024-11-16T10:15:00Z"
+    },
+    {
+      "maintenance_id": "M002",
+      "bin_id": "B007",
+      "issue": "Lid not closing",
+      "status": "In Progress",
+      "reported_at": "2024-11-15T08:45:00Z"
+    }
+  ]
+  

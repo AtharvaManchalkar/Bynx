@@ -1,0 +1,73 @@
+[
+    {
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "password": "hashed_password1",
+      "role": "Admin",
+      "created_at": "2024-11-16T10:00:00Z"
+    },
+    {
+      "name": "Jane Smith",
+      "email": "jane.smith@example.com",
+      "password": "hashed_password2",
+      "role": "Manager",
+      "created_at": "2024-11-15T09:30:00Z"
+    },
+    {
+      "name": "Michael Brown",
+      "email": "michael.brown@example.com",
+      "password": "hashed_password3",
+      "role": "Worker",
+      "created_at": "2024-11-14T08:20:00Z"
+    },
+    {
+      "name": "Emily Davis",
+      "email": "emily.davis@example.com",
+      "password": "hashed_password4",
+      "role": "Worker",
+      "created_at": "2024-11-13T08:45:00Z"
+    },
+    {
+      "name": "Chris Wilson",
+      "email": "chris.wilson@example.com",
+      "password": "hashed_password5",
+      "role": "Admin",
+      "created_at": "2024-11-12T10:15:00Z"
+    },
+    {
+      "name": "Sophia Taylor",
+      "email": "sophia.taylor@example.com",
+      "password": "hashed_password6",
+      "role": "Manager",
+      "created_at": "2024-11-11T11:30:00Z"
+    },
+    {
+      "name": "James Anderson",
+      "email": "james.anderson@example.com",
+      "password": "hashed_password7",
+      "role": "Worker",
+      "created_at": "2024-11-10T12:00:00Z"
+    },
+    {
+      "name": "Olivia Thomas",
+      "email": "olivia.thomas@example.com",
+      "password": "hashed_password8",
+      "role": "Admin",
+      "created_at": "2024-11-09T13:20:00Z"
+    },
+    {
+      "name": "Liam Martinez",
+      "email": "liam.martinez@example.com",
+      "password": "hashed_password9",
+      "role": "Worker",
+      "created_at": "2024-11-08T14:40:00Z"
+    },
+    {
+      "name": "Emma White",
+      "email": "emma.white@example.com",
+      "password": "hashed_password10",
+      "role": "Manager",
+      "created_at": "2024-11-07T15:50:00Z"
+    }
+  ]
+  

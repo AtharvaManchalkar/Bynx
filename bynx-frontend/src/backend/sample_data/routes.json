@@ -1,0 +1,28 @@
+[
+    {
+      "route_id": "R001",
+      "bins_covered": ["B001", "B002", "B003"],
+      "worker_assigned": "Michael Brown"
+    },
+    {
+      "route_id": "R002",
+      "bins_covered": ["B004", "B005"],
+      "worker_assigned": "Emily Davis"
+    },
+    {
+      "route_id": "R003",
+      "bins_covered": ["B006", "B007"],
+      "worker_assigned": "James Anderson"
+    },
+    {
+      "route_id": "R004",
+      "bins_covered": ["B008", "B009"],
+      "worker_assigned": "Liam Martinez"
+    },
+    {
+      "route_id": "R005",
+      "bins_covered": ["B010"],
+      "worker_assigned": "Sophia Taylor"
+    }
+  ]
+  
