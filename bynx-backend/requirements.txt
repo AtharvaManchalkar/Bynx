@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+motor
+pymysql
+sqlalchemy
+mysql-connector-python
+pydantic[email]
+passlib
+python-dotenv
