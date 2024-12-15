@@ -1,49 +1,100 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './ComplaintsMaintenance.css';
+import API from "../api/axios";
 
 const ComplaintsMaintenance = () => {
-    const [complaints, setComplaints] = useState([
-        { id: 1, binId: 101, description: "Overflowing bin near park entrance", status: "open", dateSubmitted: "12/11/2024" },
-        { id: 2, binId: 102, description: "Damaged bin in downtown", status: "in-progress", dateSubmitted: "10/11/2024" },
-    ]);
-
-    const [maintenanceRecords, setMaintenanceRecords] = useState([
-        { id: 1, date: "10/11/2024", binId: 101, cost: "50", notes: "Replaced damaged bin lid" },
-    ]);
-
+    const [complaints, setComplaints] = useState([]);
+    const [maintenanceRecords, setMaintenanceRecords] = useState([]);
     const [isComplaintFormVisible, setComplaintFormVisible] = useState(false);
     const [isMaintenanceFormVisible, setMaintenanceFormVisible] = useState(false);
+    const [newComplaint, setNewComplaint] = useState({ userId: '', binId: '', description: '' });
+    const [newMaintenance, setNewMaintenance] = useState({ binId: '', description: '', status: 'Pending' });
 
-    const [newComplaint, setNewComplaint] = useState({ binId: '', description: '' });
-    const [newMaintenance, setNewMaintenance] = useState({ binId: '', cost: '', notes: '' });
+    useEffect(() => {
+        const fetchComplaints = async () => {
+            try {
+                const response = await API.get("/complaints");
+                setComplaints(response.data.data);
+            } catch (error) {
+                console.error("Error fetching complaints:", error);
+            }
+        };
+
+        const fetchMaintenanceRecords = async () => {
+            try {
+                const response = await API.get("/maintenance-requests");
+                setMaintenanceRecords(response.data.data);
+            } catch (error) {
+                console.error("Error fetching maintenance records:", error);
+            }
+        };
+
+        fetchComplaints();
+        fetchMaintenanceRecords();
+    }, []);
 
     const toggleComplaintForm = () => setComplaintFormVisible(!isComplaintFormVisible);
     const toggleMaintenanceForm = () => setMaintenanceFormVisible(!isMaintenanceFormVisible);
 
-    const handleComplaintSubmit = (e) => {
+    const handleComplaintSubmit = async (e) => {
         e.preventDefault();
         const newComplaintRecord = {
-            id: complaints.length + 1,
-            binId: newComplaint.binId,
+            user_id: newComplaint.userId,
+            bin_id: newComplaint.binId,
             description: newComplaint.description,
-            status: "open",
-            dateSubmitted: new Date().toLocaleDateString('en-GB'),
+            status: "Pending",
+            created_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
         };
-        setComplaints([...complaints, newComplaintRecord]);
-        setNewComplaint({ binId: '', description: '' });
+        try {
+            const response = await API.post("/complaints", newComplaintRecord);
+            setComplaints([...complaints, response.data.data]);
+            setNewComplaint({ userId: '', binId: '', description: '' });
+        } catch (error) {
+            console.error("Error adding complaint:", error);
+        }
     };
 
-    const handleMaintenanceSubmit = (e) => {
+    const handleMaintenanceSubmit = async (e) => {
         e.preventDefault();
         const newMaintenanceRecord = {
-            id: maintenanceRecords.length + 1,
-            binId: newMaintenance.binId,
-            cost: newMaintenance.cost,
-            notes: newMaintenance.notes,
-            date: new Date().toLocaleDateString('en-GB'),
+            bin_id: newMaintenance.binId,
+            description: newMaintenance.description,
+            status: newMaintenance.status,
+            created_at: new Date().toISOString().slice(0, 19).replace('T', ' '),
         };
-        setMaintenanceRecords([...maintenanceRecords, newMaintenanceRecord]);
-        setNewMaintenance({ binId: '', cost: '', notes: '' });
+        try {
+            const response = await API.post("/maintenance-requests", newMaintenanceRecord);
+            setMaintenanceRecords([...maintenanceRecords, response.data.data]);
+            setNewMaintenance({ binId: '', description: '', status: 'Pending' });
+        } catch (error) {
+            console.error("Error adding maintenance record:", error);
+        }
+    };
+
+    const handleResolveComplaint = async (index) => {
+        const updatedComplaints = [...complaints];
+        const complaint = updatedComplaints[index];
+        complaint.status = "Resolved";
+        complaint.resolved_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        try {
+            await API.put(`/complaints/${complaint.complaint_id}`, complaint);
+            setComplaints(updatedComplaints);
+        } catch (error) {
+            console.error("Error resolving complaint:", error);
+        }
+    };
+
+    const handleCompleteMaintenance = async (index) => {
+        const updatedMaintenanceRecords = [...maintenanceRecords];
+        const record = updatedMaintenanceRecords[index];
+        record.status = "Completed";
+        record.completed_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        try {
+            await API.put(`/maintenance-requests/${record.request_id}`, record);
+            setMaintenanceRecords(updatedMaintenanceRecords);
+        } catch (error) {
+            console.error("Error completing maintenance record:", error);
+        }
     };
 
     return (
@@ -58,6 +109,12 @@ const ComplaintsMaintenance = () => {
 
             {isComplaintFormVisible && (
                 <form className="complaint-form" onSubmit={handleComplaintSubmit}>
+                    <input 
+                        type="text" 
+                        placeholder="User ID" 
+                        value={newComplaint.userId} 
+                        onChange={(e) => setNewComplaint({ ...newComplaint, userId: e.target.value })} 
+                    />
                     <input 
                         type="text" 
                         placeholder="Bin ID" 
@@ -86,20 +143,16 @@ const ComplaintsMaintenance = () => {
                 </thead>
                 <tbody>
                     {complaints.map((complaint, index) => (
-                        <tr key={complaint.id}>
-                            <td>{complaint.binId}</td>
+                        <tr key={complaint.complaint_id}>
+                            <td>{complaint.bin_id}</td>
                             <td>{complaint.description}</td>
                             <td>{complaint.status}</td>
-                            <td>{complaint.dateSubmitted}</td>
+                            <td>{new Date(complaint.created_at).toLocaleString('en-GB')}</td>
                             <td>
-                                {complaint.status !== "resolved" ? (
+                                {complaint.status !== "Resolved" ? (
                                     <button
                                         className="mark-resolved-button"
-                                        onClick={() => {
-                                            const updatedComplaints = [...complaints];
-                                            updatedComplaints[index].status = "resolved";
-                                            setComplaints(updatedComplaints);
-                                        }}
+                                        onClick={() => handleResolveComplaint(index)}
                                     >
                                         Mark as Resolved
                                     </button>
@@ -128,15 +181,9 @@ const ComplaintsMaintenance = () => {
                     />
                     <input 
                         type="text" 
-                        placeholder="Cost" 
-                        value={newMaintenance.cost} 
-                        onChange={(e) => setNewMaintenance({ ...newMaintenance, cost: e.target.value })} 
-                    />
-                    <input 
-                        type="text" 
-                        placeholder="Notes" 
-                        value={newMaintenance.notes} 
-                        onChange={(e) => setNewMaintenance({ ...newMaintenance, notes: e.target.value })} 
+                        placeholder="Description" 
+                        value={newMaintenance.description} 
+                        onChange={(e) => setNewMaintenance({ ...newMaintenance, description: e.target.value })} 
                     />
                     <button type="submit">Submit</button>
                 </form>
@@ -147,17 +194,30 @@ const ComplaintsMaintenance = () => {
                     <tr>
                         <th>Date</th>
                         <th>BinID</th>
-                        <th>Cost</th>
-                        <th>Notes</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {maintenanceRecords.map((record) => (
-                        <tr key={record.id}>
-                            <td>{record.date}</td>
-                            <td>{record.binId}</td>
-                            <td>${record.cost}</td>
-                            <td>{record.notes}</td>
+                    {maintenanceRecords.map((record, index) => (
+                        <tr key={record.request_id}>
+                            <td>{new Date(record.created_at).toLocaleString('en-GB')}</td>
+                            <td>{record.bin_id}</td>
+                            <td>{record.description}</td>
+                            <td>{record.status}</td>
+                            <td>
+                                {record.status !== "Completed" ? (
+                                    <button
+                                        className="mark-completed-button"
+                                        onClick={() => handleCompleteMaintenance(index)}
+                                    >
+                                        Mark as Completed
+                                    </button>
+                                ) : (
+                                    <span className="completed-status">Completed</span>
+                                )}
+                            </td>
                         </tr>
                     ))}
                 </tbody>

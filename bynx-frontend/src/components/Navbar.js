@@ -1,25 +1,59 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import './Navbar.css';
 
 const Navbar = () => {
-  const [isActive, setIsActive] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleToggle = () => {
-    setIsActive(!isActive);
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
   };
 
   return (
-    <nav className={isActive ? 'active' : ''}>
-      <div className="navbar-title" onClick={handleToggle}>
+    <nav className={isMenuOpen ? 'active' : ''}>
+      <div className="navbar-title" onClick={toggleMenu}>
         BYNX
       </div>
       <ul>
-        <li><Link to="/">Home</Link></li>
-        <li><Link to="/bin-management">Bin Management</Link></li>
-        <li><Link to="/collection-routes">Collection Routes</Link></li>
-        <li><Link to="/reports">Reports</Link></li>
-        <li><Link to="/complaints-maintenance">Complaints & Maintenance</Link></li>
+        <li>
+          <NavLink to="/" exact="true" activeclassname="active" onClick={closeMenu}>
+            Home
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/bin-management" activeclassname="active" onClick={closeMenu}>
+            Bin Management
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/collection-routes" activeclassname="active" onClick={closeMenu}>
+            Collection Routes
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/reports" activeclassname="active" onClick={closeMenu}>
+            Reports
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/complaints-maintenance" activeclassname="active" onClick={closeMenu}>
+            Complaints & Maintenance
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/login" activeclassname="active" onClick={closeMenu}>
+            Login
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/tasks" activeclassname="active" onClick={closeMenu}>
+            Tasks
+          </NavLink>
+        </li>
       </ul>
     </nav>
   );

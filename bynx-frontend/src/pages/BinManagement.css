@@ -70,6 +70,7 @@
     padding: 4px 8px;
     border-radius: 4px;
     color: white;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .fill-level.red {
@@ -85,6 +86,18 @@
     background-color: green;
 }
 
+.slider {
+    width: 80%;
+    margin-top: 5px;
+    transition: width 0.3s;
+}
+
+.status-label {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+}
+
 .update-status {
     padding: 6px 12px;
     background-color: #007bff;
@@ -92,10 +105,25 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 .update-status:hover {
     background-color: #0056b3;
+}
+
+.finish-button {
+    padding: 6px 12px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.finish-button:hover {
+    background-color: #218838;
 }
 
 .status-updated {
@@ -117,6 +145,11 @@
     padding: 5px;
     border-radius: 4px;
     font-size: 14px;
+}
+
+.highlight {
+    background-color: #cce5ff;
+    transition: background-color 0.3s;
 }
 
 @media (max-width: 768px) {
@@ -164,4 +197,3 @@
         padding: 4px;
     }
 }
-

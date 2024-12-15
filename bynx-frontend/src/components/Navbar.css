@@ -1,3 +1,4 @@
+/* Original Styles */
 nav {
     background-color: rgb(0, 162, 255);
     padding: 10px 15px;
@@ -16,7 +17,7 @@ nav {
 }
 
 .navbar-title:hover {
-    cursor: default;
+    cursor: pointer;
 }
 
 nav ul {
@@ -42,12 +43,18 @@ nav ul li a {
     padding: 10px;
 }
 
+nav ul li a.active {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
     .navbar-title:hover {
         cursor: pointer;
     }
 
-    .active { 
+    .active {
         display: block;
     }
 
@@ -72,4 +79,16 @@ nav ul li a {
     .navbar-title {
         margin-bottom: 0;
     }
+}
+
+/* Additional Styles */
+nav ul li a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: background-color 0.3s ease;
+}
+
+.navbar-title:active {
+    color: lightyellow;
+    transform: scale(0.95);
+    transition: transform 0.2s ease, color 0.2s ease;
 }
