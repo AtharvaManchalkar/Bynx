@@ -4,18 +4,18 @@ import './SummaryMetrics.css';
 
 const SummaryMetrics = () => {
     const [metrics, setMetrics] = useState({
-        totalBins: 10,
-        filledBins: 20,
-        pendingComplaints: 5,
-        scheduledCollections: 2,
-        availableVehicles: 7,
+        totalBins: 0,
+        filledBins: 0,
+        pendingComplaints: 0,
+        scheduledCollections: 0,
+        availableVehicles: 0,
     });
 
     useEffect(() => {
         const fetchMetrics = async () => {
             try {
-                const response = await axios.get('/api/summary-metrics');
-                setMetrics(response.data);
+                const response = await axios.get('http://localhost:8000/summary-metrics');
+                setMetrics(response.data.data);
             } catch (error) {
                 console.error('Error fetching summary metrics:', error);
             }

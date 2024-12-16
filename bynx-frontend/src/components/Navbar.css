@@ -92,3 +92,16 @@ nav ul li a:hover {
     transform: scale(0.95);
     transition: transform 0.2s ease, color 0.2s ease;
 }
+
+.logout-button {
+    background: transparent;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px;
+}
+
+.logout-button:hover {
+    color: #0056b3;
+}

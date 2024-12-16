@@ -1,13 +1,14 @@
 from pydantic import BaseModel
+from typing import Optional
 from datetime import datetime
 
 class TaskBase(BaseModel):
-    bin_id: str
-    worker_id: str
-    status: str  # pending, in-progress, completed
     description: str
+    status: str
 
 class TaskCreate(TaskBase):
+    bin_id: int
+    worker_id: int
     deadline: datetime
 
 class TaskUpdate(BaseModel):
@@ -15,4 +16,10 @@ class TaskUpdate(BaseModel):
 
 class TaskResponse(TaskBase):
     id: str
+    bin_id: int
+    worker_id: int
     deadline: datetime
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

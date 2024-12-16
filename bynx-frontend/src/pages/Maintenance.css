@@ -1,4 +1,4 @@
-.complaints-maintenance {
+.maintenance {
     padding: 20px;
 }
 
@@ -21,20 +21,20 @@
     color: #0056b3;
 }
 
-.complaints-table, .maintenance-table {
+.maintenance-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
 }
 
-.complaints-table th, .maintenance-table th,
-.complaints-table td, .maintenance-table td {
+.maintenance-table th,
+.maintenance-table td {
     padding: 10px;
     border: 1px solid #ddd;
     text-align: left;
 }
 
-.mark-resolved-button {
+.mark-completed-button {
     background-color: #28a745;
     color: white;
     padding: 5px 10px;
@@ -42,16 +42,16 @@
     cursor: pointer;
 }
 
-.mark-resolved-button:hover {
+.mark-completed-button:hover {
     background-color: #218838;
 }
 
-.resolved-status {
+.completed-status {
     color: #6c757d;
     font-weight: bold;
 }
 
-.complaint-form, .maintenance-form {
+.maintenance-form {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
@@ -59,14 +59,12 @@
     padding: 10px;
 }
 
-.complaint-form input,
 .maintenance-form input {
     padding: 8px;
     margin-right: 10px;
     flex: 1;
 }
 
-.complaint-form button,
 .maintenance-form button {
     background-color: #007bff;
     color: white;
@@ -75,13 +73,12 @@
     cursor: pointer;
 }
 
-.complaint-form button:hover,
 .maintenance-form button:hover {
     background-color: #0056b3;
 }
 
 @media (max-width: 768px) {
-    .complaints-maintenance {
+    .maintenance {
         padding: 10px;
     }
 
@@ -94,26 +91,24 @@
         margin-top: 10px;
     }
 
-    .complaints-table, .maintenance-table {
+    .maintenance-table {
         font-size: 14px;
     }
 
-    .complaints-table th, .maintenance-table th,
-    .complaints-table td, .maintenance-table td {
+    .maintenance-table th,
+    .maintenance-table td {
         padding: 5px;
     }
 
-    .complaint-form, .maintenance-form {
+    .maintenance-form {
         flex-direction: column;
     }
 
-    .complaint-form input,
     .maintenance-form input {
         margin-bottom: 10px;
         margin-right: 0;
     }
 
-    .complaint-form button,
     .maintenance-form button {
         width: 100%;
     }
