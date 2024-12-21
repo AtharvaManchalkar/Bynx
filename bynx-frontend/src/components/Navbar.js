@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
 import './Navbar.css';
 
-const Navbar = () => {
+const Navbar = ({ toggleTheme }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const userRole = localStorage.getItem('userRole');
   const navigate = useNavigate();
@@ -27,45 +27,41 @@ const Navbar = () => {
       </div>
       <ul>
         <li>
-          <NavLink to="/home" exact="true" activeclassname="active" onClick={closeMenu}>
+          <Link to="/home" onClick={closeMenu}>
             Home
-          </NavLink>
+          </Link>
         </li>
-        {userRole !== 'User' && (
-          <>
-            <li>
-              <NavLink to="/bin-management" activeclassname="active" onClick={closeMenu}>
-                Bin Management
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/collection-routes" activeclassname="active" onClick={closeMenu}>
-                Collection Routes
-              </NavLink>
-            </li>
-          </>
-        )}
         <li>
-          <NavLink to="/reports" activeclassname="active" onClick={closeMenu}>
+          <Link to="/reports" onClick={closeMenu}>
             Reports
-          </NavLink>
+          </Link>
         </li>
         <li>
-          <NavLink to="/complaints" activeclassname="active" onClick={closeMenu}>
+          <Link to="/complaints" onClick={closeMenu}>
             Complaints
-          </NavLink>
+          </Link>
         </li>
         {userRole !== 'User' && (
           <>
             <li>
-              <NavLink to="/maintenance" activeclassname="active" onClick={closeMenu}>
+              <Link to="/maintenance" onClick={closeMenu}>
                 Maintenance
-              </NavLink>
+              </Link>
             </li>
             <li>
-              <NavLink to="/tasks" activeclassname="active" onClick={closeMenu}>
+              <Link to="/tasks" onClick={closeMenu}>
                 Tasks
-              </NavLink>
+              </Link>
+            </li>
+            <li>
+              <Link to="/bin-management" onClick={closeMenu}>
+                Bin Management
+              </Link>
+            </li>
+            <li>
+              <Link to="/collection-routes" onClick={closeMenu}>
+                Collection Routes
+              </Link>
             </li>
           </>
         )}
@@ -75,6 +71,7 @@ const Navbar = () => {
           </button>
         </li>
       </ul>
+      <button onClick={toggleTheme} className="theme-toggle-button">Toggle Theme</button>
     </nav>
   );
 };

@@ -1,0 +1,6 @@
+/bynx-backend/.env
+*/venv
+/bynx-backend/app/_pycache_
+__pycache__/
+/bynx-frontend/package-lock.json
+/bynx-frontend/package.json

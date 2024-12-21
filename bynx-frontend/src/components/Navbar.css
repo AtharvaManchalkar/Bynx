@@ -1,6 +1,6 @@
 /* Original Styles */
 nav {
-    background-color: rgb(0, 162, 255);
+    background-color: var(--navbar-bg-color);
     padding: 10px 15px;
     display: flex;
     align-items: center;
@@ -11,7 +11,7 @@ nav {
     font-family: 'Courier New', Courier, monospace;
     font-size: 24px;
     font-weight: bold;
-    color: white;
+    color: var(--navbar-text-color);
     margin-right: auto;
     padding-left: 10px;
 }
@@ -36,7 +36,7 @@ nav ul li {
 }
 
 nav ul li a {
-    color: white;
+    color: var(--navbar-link-color);
     text-decoration: none;
     font-size: 16px;
     display: block;
@@ -62,7 +62,7 @@ nav ul li a.active {
         display: none;
         flex-direction: column;
         width: 100%;
-        background-color: rgb(0, 162, 255);
+        background-color: var(--navbar-bg-color);
         padding: 0;
         margin-top: 10px;
     }
@@ -96,12 +96,26 @@ nav ul li a:hover {
 .logout-button {
     background: transparent;
     border: none;
-    color: #007bff;
+    color: var(--navbar-button-bg-color);
     cursor: pointer;
     font-size: 16px;
     padding: 10px;
 }
 
 .logout-button:hover {
-    color: #0056b3;
+    color: var(--navbar-button-hover-bg-color);
+}
+
+.theme-toggle-button {
+    background: var(--navbar-button-bg-color);
+    color: var(--navbar-button-text-color);
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 10px;
+}
+
+.theme-toggle-button:hover {
+    background: var(--navbar-button-hover-bg-color);
 }
