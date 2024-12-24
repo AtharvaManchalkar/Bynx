@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { applyTheme } from "./components/theme";
 import Navbar from "./components/Navbar";
 import HomeDashboard from "./pages/HomeDashboard";
@@ -25,8 +25,22 @@ const PrivateRoute = ({ children, roles }) => {
     return children;
 };
 
+const PublicRoute = ({ children }) => {
+    const userRole = localStorage.getItem('userRole');
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (userRole && (location.pathname === '/login' || location.pathname === '/register')) {
+            navigate('/home');
+        }
+    }, [userRole, location, navigate]);
+
+    return children;
+};
+
 const App = () => {
-    const [theme, setTheme] = useState('dark');
+    const [theme, setTheme] = useState('light');
 
     useEffect(() => {
         applyTheme(theme + '-theme');
@@ -38,17 +52,15 @@ const App = () => {
         applyTheme(newTheme + '-theme');
     };
 
-    const userRole = localStorage.getItem('userRole');
-
     return (
         <div className={theme + '-theme'}>
             <Router>
                 <div>
-                    {userRole && window.location.pathname !== '/login' && window.location.pathname !== '/register' && <Navbar toggleTheme={toggleTheme} />}
+                    <Navbar toggleTheme={toggleTheme} />
                     <Routes>
                         <Route path="/" element={<Navigate to="/login" />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
+                        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+                        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
                         <Route path="/home" element={<PrivateRoute roles={['Admin', 'Worker', 'User']}><HomeDashboard /></PrivateRoute>} />
                         <Route path="/reports" element={<PrivateRoute roles={['Admin', 'Worker', 'User']}><Reports /></PrivateRoute>} />
                         <Route path="/complaints" element={<PrivateRoute roles={['Admin', 'Worker', 'User']}><Complaints /></PrivateRoute>} />
