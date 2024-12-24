@@ -1,39 +1,49 @@
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
 .login {
     padding: 40px;
     max-width: 400px;
-    margin: 0 auto;
+    width: 100%;
     background-color: var(--background-color);
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     text-align: center;
-  }
-  
-  .login h1 {
+}
+
+.login h1 {
     color: var(--text-color);
     margin-bottom: 20px;
-  }
-  
-  .login-message {
+}
+
+.login-message {
     color: var(--text-color);
     margin-bottom: 20px;
     font-weight: bold;
-  }
-  
-  .login form {
+}
+
+.login form {
     display: flex;
     flex-direction: column;
-  }
-  
-  .login input,
-  .login select {
+}
+
+.login input,
+.login select {
     margin-bottom: 15px;
     padding: 12px;
     border: 1px solid var(--navbar-link-color);
     border-radius: 4px;
     font-size: 16px;
-  }
-  
-  .login button {
+}
+
+.login button {
     background-color: var(--navbar-button-bg-color);
     color: var(--navbar-button-text-color);
     border: none;
@@ -43,8 +53,25 @@
     font-size: 16px;
     transition: background-color 0.3s;
     border-radius: 4px;
-  }
-  
-  .login button:hover {
+}
+
+.login button:hover {
     background-color: var(--navbar-button-hover-bg-color);
-  }
+}
+
+@media (max-width: 480px) {
+    .login {
+        padding: 20px;
+    }
+
+    .login input,
+    .login select {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .login button {
+        padding: 10px;
+        font-size: 14px;
+    }
+}

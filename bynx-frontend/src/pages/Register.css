@@ -1,7 +1,17 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  overflow: hidden;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
 .login {
   padding: 40px;
   max-width: 400px;
-  margin: 0 auto;
+  width: 100%;
   background-color: var(--background-color);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -47,4 +57,21 @@
 
 .login button:hover {
   background-color: var(--navbar-button-hover-bg-color);
+}
+
+@media (max-width: 480px) {
+  .login {
+      padding: 20px;
+  }
+
+  .login input,
+  .login select {
+      padding: 10px;
+      font-size: 14px;
+  }
+
+  .login button {
+      padding: 10px;
+      font-size: 14px;
+  }
 }
