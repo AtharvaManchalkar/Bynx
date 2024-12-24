@@ -11,6 +11,16 @@ def get_tasks():
     connection.close()
     return tasks
 
+def get_tasks_by_worker(worker_id: int):
+    connection = get_mysql_connection()
+    cursor = connection.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Tasks WHERE worker_id = %s", (worker_id,))
+    tasks = cursor.fetchall()
+    for task in tasks:
+        task['id'] = str(task['id'])  # Convert id to string
+    connection.close()
+    return tasks
+
 def create_task(task: TaskCreate):
     connection = get_mysql_connection()
     cursor = connection.cursor()

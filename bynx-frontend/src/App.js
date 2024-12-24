@@ -63,9 +63,9 @@ const App = () => {
                         <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
                         <Route path="/home" element={<PrivateRoute roles={['Admin', 'Worker', 'User']}><HomeDashboard /></PrivateRoute>} />
                         <Route path="/reports" element={<PrivateRoute roles={['Admin', 'Worker', 'User']}><Reports /></PrivateRoute>} />
-                        <Route path="/complaints" element={<PrivateRoute roles={['Admin', 'Worker', 'User']}><Complaints /></PrivateRoute>} />
+                        <Route path="/complaints" element={<PrivateRoute roles={['Admin', 'User']}><Complaints /></PrivateRoute>} />
                         <Route path="/maintenance" element={<PrivateRoute roles={['Admin', 'Worker']}><Maintenance /></PrivateRoute>} />
-                        <Route path="/tasks" element={<PrivateRoute roles={['Admin', 'Worker']}><Tasks /></PrivateRoute>} />
+                        <Route path="/tasks" element={<PrivateRoute roles={['Worker']}><Tasks /></PrivateRoute>} />
                         <Route path="/bin-management" element={<PrivateRoute roles={['Admin', 'Worker']}><BinManagement /></PrivateRoute>} />
                         <Route path="/collection-routes" element={<PrivateRoute roles={['Admin', 'Worker']}><CollectionRoutes /></PrivateRoute>} />
                         <Route path="/dashboard" element={<PrivateRoute roles={['Admin', 'Worker']}><HomeDashboard /></PrivateRoute>} />

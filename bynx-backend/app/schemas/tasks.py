@@ -7,18 +7,20 @@ class TaskBase(BaseModel):
     status: str
 
 class TaskCreate(TaskBase):
-    bin_id: int
+    complaint_id: int
+    location: str
     worker_id: int
-    deadline: datetime
+    assigned_at: datetime = datetime.now()
 
 class TaskUpdate(BaseModel):
     status: str
 
 class TaskResponse(TaskBase):
     id: str
-    bin_id: int
+    complaint_id: int
+    location: str
     worker_id: int
-    deadline: datetime
+    assigned_at: datetime
     created_at: datetime
 
     class Config:

@@ -1,8 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.mysql import get_mysql_connection
-from app.database.mongodb import get_mongo_connection
-from app.routes import bins, tasks
+from app.routes import bins, tasks, complaints, users
 import mysql.connector
 from datetime import datetime
 from dotenv import load_dotenv
@@ -130,8 +129,8 @@ async def add_complaint(complaint: dict):
     try:
         connection = get_mysql_connection()
         cursor = connection.cursor()
-        query = "INSERT INTO Complaints (user_id, bin_id, description, status, created_at) VALUES (%s, %s, %s, %s, %s)"
-        cursor.execute(query, (complaint['user_id'], complaint['bin_id'], complaint['description'], complaint['status'], complaint['created_at']))
+        query = "INSERT INTO Complaints (user_id, location, description, status, created_at) VALUES (%s, %s, %s, %s, %s)"
+        cursor.execute(query, (complaint['user_id'], complaint['location'], complaint['description'], complaint['status'], complaint['created_at']))
         connection.commit()
         complaint_id = cursor.lastrowid
         connection.close()
@@ -146,8 +145,8 @@ async def update_complaint(complaint_id: int, complaint: dict):
     try:
         connection = get_mysql_connection()
         cursor = connection.cursor()
-        query = "UPDATE Complaints SET status = %s, resolved_at = %s WHERE complaint_id = %s"
-        cursor.execute(query, (complaint['status'], complaint['resolved_at'], complaint_id))
+        query = "UPDATE Complaints SET status = %s, resolved_at = %s, assigned_to = %s WHERE complaint_id = %s"
+        cursor.execute(query, (complaint.get('status'), complaint.get('resolved_at'), complaint.get('assigned_to'), complaint_id))
         connection.commit()
         connection.close()
         return {"message": "Complaint updated successfully"}
@@ -214,19 +213,14 @@ async def fetch_bins():
         print(f"Error fetching bins: {err}")
         raise HTTPException(status_code=500, detail=str(err))
 
-@app.get("/mongo-bins")
-async def fetch_mongo_bins():
-    try:
-        db = await get_mongo_connection()
-        bins_collection = db["bins"]
-        bins = await bins_collection.find().to_list(length=100)
-        return {"data": bins}
-    except Exception as err:
-        print(f"Error fetching mongo bins: {err}")
-        raise HTTPException(status_code=500, detail=str(err))
-
 # Include the bins router
 app.include_router(bins.router)
 
 # Include the tasks router
 app.include_router(tasks.router)
+
+# Include the complaints router
+app.include_router(complaints.router)
+
+# Include the users router
+app.include_router(users.router)

@@ -2,6 +2,8 @@ import mysql.connector
 from mysql.connector import Error
 from dotenv import load_dotenv
 import os
+from passlib.hash import bcrypt
+from datetime import datetime
 
 # Load environment variables from .env file
 load_dotenv()
@@ -85,13 +87,13 @@ def create_tables(connection):
     CREATE TABLE IF NOT EXISTS Complaints (
         complaint_id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT NOT NULL,
-        bin_id INT,
+        location VARCHAR(255) NOT NULL,
         description TEXT NOT NULL,
         status ENUM('Pending', 'Resolved') DEFAULT 'Pending',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         resolved_at DATETIME,
-        FOREIGN KEY (user_id) REFERENCES Users(user_id),
-        FOREIGN KEY (bin_id) REFERENCES Bins(bin_id)
+        assigned_to VARCHAR(100) DEFAULT 'Not yet assigned',
+        FOREIGN KEY (user_id) REFERENCES Users(user_id)
     )
     """)
     
@@ -110,13 +112,14 @@ def create_tables(connection):
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS Tasks (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        description VARCHAR(255) NOT NULL,
+        complaint_id INT NOT NULL,
+        location VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
         status ENUM('pending', 'completed') DEFAULT 'pending',
-        bin_id INT NOT NULL,
         worker_id INT NOT NULL,
-        deadline DATETIME NOT NULL,
+        assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (bin_id) REFERENCES Bins(bin_id),
+        FOREIGN KEY (complaint_id) REFERENCES Complaints(complaint_id),
         FOREIGN KEY (worker_id) REFERENCES Users(user_id)
     )
     """)
@@ -145,7 +148,14 @@ def insert_initial_data(connection):
         VALUES
         ('Downtown', 100, 50, 'Partially Full', NOW()),
         ('Uptown', 200, 100, 'Full', NOW()),
-        ('Suburb', 150, 0, 'Empty', NOW())
+        ('Suburb', 150, 0, 'Empty', NOW()),
+        ('Central Park', 120, 80, 'Full', NOW()),
+        ('Sector 5', 180, 90, 'Full', NOW()),
+        ('Sector 8', 160, 40, 'Partially Full', NOW()),
+        ('Main Street', 140, 70, 'Partially Full', NOW()),
+        ('Sector 11', 130, 0, 'Empty', NOW()),
+        ('Sector 3', 110, 55, 'Partially Full', NOW()),
+        ('Market Road', 170, 85, 'Full', NOW())
         """)
     
     # Insert initial data for CollectionSchedules
@@ -156,7 +166,14 @@ def insert_initial_data(connection):
         VALUES
         (1, 1, NOW(), 'Scheduled'),
         (2, 2, NOW(), 'Scheduled'),
-        (3, 3, NOW(), 'Scheduled')
+        (3, 3, NOW(), 'Scheduled'),
+        (4, 1, NOW(), 'Scheduled'),
+        (5, 2, NOW(), 'Scheduled'),
+        (6, 3, NOW(), 'Scheduled'),
+        (7, 1, NOW(), 'Scheduled'),
+        (8, 2, NOW(), 'Scheduled'),
+        (9, 3, NOW(), 'Scheduled'),
+        (10, 1, NOW(), 'Scheduled')
         """)
     
     # Insert initial data for Vehicles
@@ -167,50 +184,72 @@ def insert_initial_data(connection):
         VALUES
         ('V001', 1000, 'Available'),
         ('V002', 1500, 'In Use'),
-        ('V003', 1200, 'Under Maintenance')
+        ('V003', 1200, 'Under Maintenance'),
+        ('V004', 1300, 'Available'),
+        ('V005', 1400, 'In Use')
         """)
     
     # Insert initial data for Users
     cursor.execute("SELECT COUNT(*) FROM Users")
     if cursor.fetchone()[0] == 0:
-        cursor.execute("""
+        users = [
+            ("Admin User", "admin@example.com", "adminpassword", "Admin", None),
+            ("Worker User", "worker@example.com", "workerpassword", "Worker", 1),
+            ("Regular User", "user@example.com", "userpassword", "User", None),
+            ("Worker One", "worker1@example.com", "worker1password", "Worker", 2),
+            ("Worker Two", "worker2@example.com", "worker2password", "Worker", 3),
+            ("Worker Three", "worker3@example.com", "worker3password", "Worker", 4),
+            ("Worker Four", "worker4@example.com", "worker4password", "Worker", 5)
+        ]
+        cursor.executemany("""
         INSERT INTO Users (name, email, password, role, vehicle_id)
-        VALUES
-        ('Admin User', 'admin@example.com', 'adminpassword', 'Admin', NULL),
-        ('Worker User', 'worker@example.com', 'workerpassword', 'Worker', 1),
-        ('Regular User', 'user@example.com', 'userpassword', 'User', NULL)
-        """)
+        VALUES (%s, %s, %s, %s, %s)
+        """, users)
     
     # Insert initial data for Complaints
     cursor.execute("SELECT COUNT(*) FROM Complaints")
     if cursor.fetchone()[0] == 0:
-        cursor.execute("""
-        INSERT INTO Complaints (user_id, bin_id, description, status, created_at, resolved_at)
-        VALUES
-        (3, 1, 'Bin is overflowing', 'Pending', NOW(), NULL),
-        (3, 2, 'Bin is damaged', 'Resolved', NOW(), NOW())
-        """)
+        complaints = [
+            (3, 'Sector 5', 'Bin is overflowing', 'Pending', datetime.now(), None, 'Not yet assigned'),
+            (3, 'Central Park', 'Bin is damaged', 'Resolved', datetime.now(), datetime.now(), 'Worker One'),
+            (4, 'Sector 8', 'Bin is full', 'Pending', datetime.now(), None, 'Not yet assigned'),
+            (5, 'Main Street', 'Bin is partially full', 'Pending', datetime.now(), None, 'Not yet assigned'),
+            (6, 'Sector 11', 'Bin is empty', 'Resolved', datetime.now(), datetime.now(), 'Worker Two')
+        ]
+        cursor.executemany("""
+        INSERT INTO Complaints (user_id, location, description, status, created_at, resolved_at, assigned_to)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, complaints)
     
     # Insert initial data for MaintenanceRequests
     cursor.execute("SELECT COUNT(*) FROM MaintenanceRequests")
     if cursor.fetchone()[0] == 0:
-        cursor.execute("""
+        maintenance_requests = [
+            (1, 'Fix the lid', 'Pending', datetime.now(), None),
+            (2, 'Replace the bin', 'Completed', datetime.now(), datetime.now()),
+            (3, 'Repair the base', 'In Progress', datetime.now(), None),
+            (4, 'Fix the handle', 'Pending', datetime.now(), None),
+            (5, 'Replace the cover', 'Completed', datetime.now(), datetime.now())
+        ]
+        cursor.executemany("""
         INSERT INTO MaintenanceRequests (bin_id, description, status, created_at, completed_at)
-        VALUES
-        (1, 'Fix the lid', 'Pending', NOW(), NULL),
-        (2, 'Replace the bin', 'Completed', NOW(), NOW())
-        """)
+        VALUES (%s, %s, %s, %s, %s)
+        """, maintenance_requests)
     
     # Insert initial data for Tasks
     cursor.execute("SELECT COUNT(*) FROM Tasks")
     if cursor.fetchone()[0] == 0:
-        cursor.execute("""
-        INSERT INTO Tasks (description, status, bin_id, worker_id, deadline)
-        VALUES
-        ('Task 1', 'pending', 1, 2, NOW() + INTERVAL 1 DAY),
-        ('Task 2', 'completed', 2, 3, NOW() + INTERVAL 2 DAY),
-        ('Task 3', 'pending', 3, 1, NOW() + INTERVAL 3 DAY)
-        """)
+        tasks = [
+            (1, 'Sector 5', 'Bin is overflowing', 'pending', 2, datetime.now()),
+            (2, 'Central Park', 'Bin is damaged', 'completed', 3, datetime.now()),
+            (3, 'Sector 8', 'Bin is full', 'pending', 4, datetime.now()),
+            (4, 'Main Street', 'Bin is partially full', 'pending', 5, datetime.now()),
+            (5, 'Sector 11', 'Bin is empty', 'completed', 6, datetime.now())
+        ]
+        cursor.executemany("""
+        INSERT INTO Tasks (complaint_id, location, description, status, worker_id, assigned_at)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        """, tasks)
     
     connection.commit()
 
