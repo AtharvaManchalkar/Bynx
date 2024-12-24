@@ -1,0 +1,92 @@
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  padding: 30px;
+  border: 1px solid var(--navbar-link-color);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  color: var(--text-color);
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: var(--navbar-button-hover-bg-color);
+}
+
+.add-announcement h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.add-announcement .form-group {
+  margin-bottom: 20px;
+}
+
+.add-announcement .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.add-announcement .form-group input,
+.add-announcement .form-group textarea {
+  width: 95%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #fff;
+  color: #333;
+}
+
+.add-announcement .form-group textarea {
+  resize: vertical;
+  height: 100px;
+}
+
+.add-announcement button {
+  padding: 12px 20px;
+  background-color: var(--navbar-button-bg-color);
+  color: var(--navbar-button-text-color);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.add-announcement button:hover {
+  background-color: var(--navbar-button-hover-bg-color);
+}
+
+.add-announcement button:last-child {
+  margin-right: 0;
+}

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.mysql import get_mysql_connection
-from app.routes import bins, tasks, complaints, users
+from app.routes import bins, tasks, complaints, users, announcements
 import mysql.connector
 from datetime import datetime
 from dotenv import load_dotenv
@@ -224,3 +224,4 @@ app.include_router(complaints.router)
 
 # Include the users router
 app.include_router(users.router)
+app.include_router(announcements.router)

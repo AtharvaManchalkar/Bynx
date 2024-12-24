@@ -1,98 +1,52 @@
 .home-dashboard {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    background-color: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #f4f4f4;
 }
 
 .dashboard-content {
-    width: 100%;
-    max-width: 1200px;
-    background-color: #fff;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+  width: 100%;
+  max-width: 1200px;
+  background-color: #fff;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 .dashboard-title {
-    font-size: 2em;
-    margin-bottom: 20px;
-    color: #333;
-    text-align: center;
-
+  font-size: 2em;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
 }
 
-.action-buttons {
-    display: flex;
-    justify-content:space-around;
-    margin: 20px 0;
+.add-announcement-button {
+  padding: 10px 20px;
+  background-color: var(--navbar-button-bg-color);
+  color: var(--navbar-button-text-color);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 20px 0;
 }
 
-.action-buttons button {
-    padding: 10px 20px;
-    font-size: 1em;
-    color: #fff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.action-buttons button:hover {
-    background-color: #0056b3;
-}
-
-.recent-alerts {
-    margin-top: 7%;
-}
-
-.recent-alerts h2 {
-    font-size: 1.5em;
-    margin-bottom: 10px;
-    color: #333;
-}
-
-.recent-alerts p {
-    font-size: 1em;
-    color: #666;
-    margin: 5px 0;
+.add-announcement-button:hover {
+  background-color: var(--navbar-button-hover-bg-color);
 }
 
 @media (max-width: 768px) {
-    .home-dashboard {
-        padding: 10px;
-    }
+  .home-dashboard {
+    padding: 10px;
+  }
 
-    .dashboard-content {
-        padding: 10px;
-    }
+  .dashboard-content {
+    padding: 10px;
+  }
 
-    .dashboard-title {
-        font-size: 1.5em;
-        margin-bottom: 15px;
-    }
-
-    .action-buttons {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .action-buttons button {
-        width: 75%;
-        margin-bottom: 10px;
-    }
-
-    .recent-alerts {
-        margin-top: 10%;
-    }
-
-    .recent-alerts h2 {
-        font-size: 1.2em;
-    }
-
-    .recent-alerts p {
-        font-size: 0.9em;
-    }
+  .dashboard-title {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+  }
 }
