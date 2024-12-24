@@ -213,6 +213,35 @@ async def fetch_bins():
         print(f"Error fetching bins: {err}")
         raise HTTPException(status_code=500, detail=str(err))
 
+@app.get("/report-data")
+async def fetch_report_data():
+    try:
+        connection = get_mysql_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # Fetch total waste collected over time
+        cursor.execute("""
+            SELECT DATE(last_collected) as date, SUM(current_level) as total_waste
+            FROM Bins
+            GROUP BY DATE(last_collected)
+            ORDER BY DATE(last_collected)
+        """)
+        waste_data = cursor.fetchall()
+
+        # Fetch bin level trends
+        cursor.execute("""
+            SELECT location, current_level
+            FROM Bins
+        """)
+        bin_data = cursor.fetchall()
+
+        connection.close()
+
+        return {"waste_data": waste_data, "bin_data": bin_data}
+    except mysql.connector.Error as err:
+        print(f"Error fetching report data: {err}")
+        raise HTTPException(status_code=500, detail=str(err))
+    
 # Include the bins router
 app.include_router(bins.router)
 

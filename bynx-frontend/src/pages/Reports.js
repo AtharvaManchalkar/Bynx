@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Line, Bar } from 'react-chartjs-2';
 import './Reports.css';
+import API from "../api/axios";
 import {
     Chart as ChartJS,
     CategoryScale,
     LinearScale,
     PointElement,
     LineElement,
-    BarElement,  // Add BarElement
+    BarElement,
     Title,
     Tooltip,
     Legend,
@@ -18,7 +19,7 @@ ChartJS.register(
     LinearScale,
     PointElement,
     LineElement,
-    BarElement,  // Register BarElement here
+    BarElement,
     Title,
     Tooltip,
     Legend
@@ -27,6 +28,22 @@ ChartJS.register(
 const Reports = () => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [wasteData, setWasteData] = useState([]);
+    const [binData, setBinData] = useState([]);
+
+    useEffect(() => {
+        const fetchReportData = async () => {
+            try {
+                const response = await API.get('/report-data');
+                setWasteData(response.data.waste_data);
+                setBinData(response.data.bin_data);
+            } catch (error) {
+                console.error('Error fetching report data:', error);
+            }
+        };
+
+        fetchReportData();
+    }, []);
 
     const handleFilterApply = () => {
         alert(`Applying filter from ${startDate} to ${endDate}`);
@@ -34,11 +51,11 @@ const Reports = () => {
     };
 
     const lineChartData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], // Example x-axis labels
+        labels: wasteData.map(data => data.date),
         datasets: [
             {
                 label: 'Total Waste Collected (kg)',
-                data: [120, 190, 300, 500, 200, 300], // Example data
+                data: wasteData.map(data => data.total_waste),
                 borderColor: 'rgba(75,192,192,1)',
                 backgroundColor: 'rgba(75,192,192,0.2)',
                 fill: true,
@@ -47,11 +64,11 @@ const Reports = () => {
     };
 
     const barChartData = {
-        labels: ['Bin 1', 'Bin 2', 'Bin 3', 'Bin 4'], // Example x-axis labels
+        labels: binData.map(data => data.location),
         datasets: [
             {
                 label: 'Bin Level (%)',
-                data: [80, 55, 65, 90], // Example data
+                data: binData.map(data => data.current_level),
                 backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
             },
         ],
