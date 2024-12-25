@@ -9,9 +9,16 @@
 }
 
 .main-content {
-    height: calc(100vh - 100px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
 }
-
+.map-and-routes {
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+}
 .map-section h2 {
     font-size: 1.5rem;
     margin-bottom: 10px;
@@ -21,28 +28,41 @@
     height: 500px;
     width: 100%;
     position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+
+
 .map-section {
-    height: 100%;
     width: 100%;
+    margin-bottom: 20px;
 }
+
 .legend {
-    margin-top: 10px;
+    width: 80%;
+    margin: 15px 0;
+    padding: 15px;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .legend h3 {
     font-size: 1.2rem;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
+    color: #333;
+    text-align: center;
+}
+
+.legend p {
+    margin: 8px 0;
+    font-weight: 500;
 }
 
 .control-panel {
     width: 35%;
-    background-color: #f9f9f9;
-    padding: 10px;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    height: fit-content;
 }
 
 .control-panel h2 {
@@ -91,4 +111,76 @@
         width: 100%;
         margin-bottom: 20px;
     }
+}
+.routing-section {
+    width: 100%;
+}
+
+.route-instructions {
+    width: 100%;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.routing-container {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+.route-container h4 {
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid currentColor;
+}
+
+.waypoints-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.waypoint-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+.leaflet-routing-container {
+    flex: 1;
+    background: white;
+    padding: 15px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: static !important;
+    margin: 0;
+}
+
+.bin-popup {
+    min-width: 200px;
+}
+
+.bin-info {
+    padding: 10px;
+}
+
+.bin-info h4 {
+    color: #333;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 5px;
+}
+
+.bin-info p {
+    margin: 8px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.fill-level {
+    margin-top: 10px;
 }

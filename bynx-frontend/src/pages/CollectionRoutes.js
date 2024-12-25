@@ -41,17 +41,49 @@ const CollectionRoutes = () => {
             L.latLng(bin.location.split(',').map(Number))
         );
         
-        return L.Routing.control({
+        const control = L.Routing.control({
             waypoints: waypoints,
             routeWhileDragging: false,
             lineOptions: {
-                styles: [{ color: color, weight: 4, opacity: 0.7 }]
+                styles: [{ color: color, weight: 4, opacity: 0.7 }],
+                zIndex: 1 // Set lower z-index for routes
             },
             addWaypoints: false,
             draggableWaypoints: false,
             fitSelectedRoutes: true,
             showAlternatives: false
-        }).addTo(map);
+        });
+    
+        control.on('routesfound', () => {
+            const routingContainer = document.querySelector('.leaflet-routing-container');
+            if (routingContainer) {
+                document.getElementById('routing-container').appendChild(routingContainer);
+            }
+        });
+    
+        return control.addTo(map);
+    };
+    
+    const RouteInstructions = ({ routeData }) => {
+        return (
+            <div className="route-instructions">
+                {routeData.map((route, index) => (
+                    <div key={index} className="route-container">
+                        <h4 style={{ color: route.color }}>
+                            {index === 0 ? 'Urgent Route' : 'Normal Route'} Instructions
+                        </h4>
+                        <div className="waypoints-list">
+                            {route.waypoints.map((waypoint, idx) => (
+                                <div key={idx} className="waypoint-item">
+                                    <span>Stop {idx + 1}</span>
+                                    <span>Lat: {waypoint.lat.toFixed(4)}, Lng: {waypoint.lng.toFixed(4)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
     };
     
     useEffect(() => {
@@ -77,8 +109,7 @@ const CollectionRoutes = () => {
         const assignedRoutes = assignBinsToRoutes(bins);
         setRoutes(assignedRoutes);
         
-        const map = mapRef.current;
-        if (map) {
+        if (mapRef.current) {
             // Clear existing routes
             if (routingControl) {
                 routingControl.forEach(control => control.remove());
@@ -86,8 +117,12 @@ const CollectionRoutes = () => {
             
             // Create new road-based routes
             const newControls = assignedRoutes.map((route, index) => 
-                createRoadRoute(route, map, index === 0 ? '#FF0000' : '#00FF00')
-            );
+                createRoadRoute(
+                    route, 
+                    mapRef.current, 
+                    index === 0 ? '#FF0000' : '#00FF00'
+                )
+            ).filter(Boolean);
             
             setRoutingControl(newControls);
         }
@@ -113,25 +148,29 @@ const CollectionRoutes = () => {
 
     const MapComponent = () => {
         const map = useMap();
+        
         useEffect(() => {
-            mapRef.current = map;
-            map.invalidateSize();
+            if (map) {
+                mapRef.current = map;
+                map.invalidateSize();
+            }
         }, [map]);
+        
         return null;
     };
-
     return (
         <div className="collection-routes">
             <h1>Collection Routes</h1>
 
             <div className="main-content">
-                <div className="map-section">
-                    <h2>Map</h2>
-                    <div className="map-container">
-                    <MapContainer 
-                    center={mapCenter} 
-                    zoom={mapZoom} 
-                    style={{ height: "100%", width: "100%" }}
+                <div className="map-and-routes">
+                    <div className="map-section">
+                        <h2>Map</h2>
+                        <div className="map-container">
+                        <MapContainer 
+                            center={mapCenter} 
+                            zoom={mapZoom} 
+                            style={{ height: "100%", width: "100%" }}
                         >
                             <MapComponent />
                             <TileLayer
@@ -142,37 +181,42 @@ const CollectionRoutes = () => {
                                 <Marker 
                                     key={bin.bin_id} 
                                     position={bin.location.split(',').map(Number)}
+                                    zIndexOffset={1000} // Ensure markers stay on top
                                 >
-                                    <Popup>
-                                        <div>
-                                            <strong>Bin ID:</strong> {bin.bin_id}<br/>
-                                            <strong>Status:</strong> {bin.status}<br/>
-                                            <strong>Capacity:</strong> {bin.capacity}<br/>
-                                            <strong>Current Level:</strong> {bin.current_level}
+                                    <Popup className="bin-popup">
+                                        <div className="bin-info">
+                                            <h4>Bin Details</h4>
+                                            <p><strong>Bin ID:</strong> {bin.bin_id}</p>
+                                            <p><strong>Status:</strong> {bin.status}</p>
+                                            <p><strong>Capacity:</strong> {bin.capacity}L</p>
+                                            <p><strong>Current Level:</strong> {bin.current_level}%</p>
+                                            <div className="fill-level">
+                                                <div style={{
+                                                    width: `${bin.current_level}%`,
+                                                    backgroundColor: bin.current_level > 70 ? '#ff4444' : '#44aa44'
+                                                }}/>
+                                            </div>
                                         </div>
                                     </Popup>
                                 </Marker>
                             ))}
-                            {showTruck && routes.map((route, index) => (
-                                <Polyline 
-                                    key={index} 
-                                    positions={route.map(bin => bin.location.split(',').map(Number))} 
-                                    color={index === 0 ? '#FF0000' : '#00FF00'} 
-                                    weight={4}
-                                    opacity={0.8}
-                                />
-                            ))}
                         </MapContainer>
+
+                        </div>
                     </div>
-                    <div className="legend">
-                    <h3>Legend</h3>
-                    <p style={{ color: "#FF0000" }}>Urgent Route (70% full)</p>
-                    <p style={{ color: "#00FF00" }}>Normal Route (≤70% full)</p>
+                    <div className="routing-section">
+                    <h2>Route Details</h2>
+                    <div id="routing-container" className="routing-container"></div>
                     </div>
                 </div>
 
                 <div className="control-panel">
                     <h2>Control Panel</h2>
+                    <div className="legend">
+                        <h3>Legend</h3>
+                        <p style={{ color: "#FF0000" }}>Urgent Route (70% full)</p>
+                        <p style={{ color: "#00FF00" }}>Normal Route (≤70% full)</p>
+                    </div>
                     <button onClick={handleAssignBins} className="control-button">Assign Bins to Trucks</button>
                     <div className="toggle">
                         <label>
