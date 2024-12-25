@@ -37,6 +37,7 @@ def get_all_bins():
         query = "SELECT * FROM Bins"
         cursor.execute(query)
         bins = cursor.fetchall()
+        
         connection.close()
         return bins
     except Exception as err:
