@@ -1,5 +1,5 @@
 .collection-routes {
-    padding: 20px;
+    height: 100vh;
 }
 
 .collection-routes h1 {
@@ -9,15 +9,7 @@
 }
 
 .main-content {
-    display: flex;
-    justify-content: space-between;
-}
-
-.map-section {
-    width: 60%;
-    background-color: #f0f0f0;
-    padding: 10px;
-    border-radius: 8px;
+    height: calc(100vh - 100px);
 }
 
 .map-section h2 {
@@ -25,17 +17,15 @@
     margin-bottom: 10px;
 }
 
-.map-placeholder {
-    height: 300px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #e0e0e0;
-    border: 1px dashed #aaa;
-    border-radius: 8px;
-    margin-bottom: 20px;
+.map-container {
+    height: 500px;
+    width: 100%;
+    position: relative;
 }
-
+.map-section {
+    height: 100%;
+    width: 100%;
+}
 .legend {
     margin-top: 10px;
 }
@@ -100,14 +90,5 @@
     .map-section, .control-panel {
         width: 100%;
         margin-bottom: 20px;
-    }
-
-    .map-placeholder {
-        height: 200px;
-    }
-
-    .control-button {
-        width: 100%;
-        text-align: center;
     }
 }

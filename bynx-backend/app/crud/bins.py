@@ -29,3 +29,16 @@ def update_bin(bin_id: int, bin_update: dict):
     except Exception as err:
         print(f"Error updating bin: {err}")
         return None
+
+def get_all_bins():
+    try:
+        connection = get_mysql_connection()
+        cursor = connection.cursor(dictionary=True)
+        query = "SELECT * FROM Bins"
+        cursor.execute(query)
+        bins = cursor.fetchall()
+        connection.close()
+        return bins
+    except Exception as err:
+        print(f"Error fetching bins: {err}")
+        return []

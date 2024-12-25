@@ -1,7 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter, Query
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.mysql import get_mysql_connection
 from app.routes import bins, tasks, complaints, users, announcements
+from app.crud.bins import get_bin, update_bin, get_all_bins
+from app.schemas.bins import BinResponse, BinUpdate
+from typing import List
 import mysql.connector
 from datetime import datetime
 from dotenv import load_dotenv
@@ -16,7 +19,7 @@ load_dotenv()
 subprocess.run(["python", "init_db.py"])
 
 app = FastAPI()
-
+router = APIRouter()
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
@@ -197,35 +200,44 @@ async def update_maintenance_request(request_id: int, request: dict):
         print(f"Error: {err}")
         raise HTTPException(status_code=500, detail=str(err))
 
-@app.get("/bins")
-async def fetch_bins():
+@router.put("/bins/{bin_id}")
+async def update_existing_bin(bin_id: int, bin_update: BinUpdate):
     try:
-        connection = get_mysql_connection()
-        cursor = connection.cursor(dictionary=True)
-        query = "SELECT * FROM Bins"
-        cursor.execute(query)
-        bins = cursor.fetchall()
-        for bin in bins:
-            bin['last_collected'] = bin['last_collected'].strftime('%Y-%m-%d %H:%M:%S') if bin['last_collected'] else None
-        connection.close()
-        return {"data": bins}
-    except mysql.connector.Error as err:
+        existing_bin = get_bin(bin_id)
+        if not existing_bin:
+            raise HTTPException(status_code=404, detail="Bin not found")
+        updated_bin = update_bin(bin_id, bin_update.dict())
+        return {"message": "Bin updated successfully", "data": updated_bin}
+    except Exception as err:
+        print(f"Error updating bin: {err}")
+        raise HTTPException(status_code=500, detail=str(err))
+
+@app.get("/bins", response_model=List[BinResponse])
+async def fetch_all_bins():
+    try:
+        bins = get_all_bins()
+        return bins
+    except Exception as err:
         print(f"Error fetching bins: {err}")
         raise HTTPException(status_code=500, detail=str(err))
 
 @app.get("/report-data")
-async def fetch_report_data():
+async def fetch_report_data(start_date: str = Query(None), end_date: str = Query(None)):
     try:
         connection = get_mysql_connection()
         cursor = connection.cursor(dictionary=True)
 
         # Fetch total waste collected over time
-        cursor.execute("""
+        query = """
             SELECT DATE(last_collected) as date, SUM(current_level) as total_waste
             FROM Bins
-            GROUP BY DATE(last_collected)
-            ORDER BY DATE(last_collected)
-        """)
+        """
+        params = []
+        if start_date and end_date:
+            query += " WHERE DATE(last_collected) BETWEEN %s AND %s"
+            params.extend([start_date, end_date])
+        query += " GROUP BY DATE(last_collected) ORDER BY DATE(last_collected)"
+        cursor.execute(query, params)
         waste_data = cursor.fetchall()
 
         # Fetch bin level trends
