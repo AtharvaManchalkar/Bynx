@@ -37,7 +37,7 @@ const BinManagement = () => {
         // Search by location or bin_id
         if (searchQuery) {
             updatedBins = updatedBins.filter(bin =>
-                bin.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                bin.location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 bin.bin_id.toString().includes(searchQuery)
             );
         }
@@ -46,7 +46,7 @@ const BinManagement = () => {
         if (sortBy) {
             updatedBins.sort((a, b) => {
                 if (sortBy === 'location') {
-                    return a.location.localeCompare(b.location);
+                    return a.location.name.localeCompare(b.location.name);
                 } else if (sortBy === 'capacity') {
                     return a.capacity - b.capacity;
                 } else if (sortBy === 'current_level') {
@@ -91,7 +91,7 @@ const BinManagement = () => {
 
         try {
             await API.put(`/bins/${bin.bin_id}`, {
-                location: bin.location,
+                location_id: bin.location.id,
                 capacity: bin.capacity,
                 current_level: bin.current_level,
                 status: bin.status,
@@ -142,9 +142,9 @@ const BinManagement = () => {
                 </thead>
                 <tbody>
                     {Array.isArray(filteredBins) && filteredBins.map((bin, index) => (
-                        <tr key={bin.bin_id} className={searchQuery && (bin.location.toLowerCase().includes(searchQuery.toLowerCase()) || bin.bin_id.toString().includes(searchQuery)) ? 'highlight' : ''}>
+                        <tr key={bin.bin_id} className={searchQuery && (bin.location.name.toLowerCase().includes(searchQuery.toLowerCase()) || bin.bin_id.toString().includes(searchQuery)) ? 'highlight' : ''}>
                             <td>{bin.bin_id}</td>
-                            <td>{bin.location}</td>
+                            <td>{bin.location.name}</td>
                             <td>{bin.capacity}</td>
                             <td>
                                 <div className={`fill-level ${editingIndex === index ? (currentLevel > 75 ? 'red' : currentLevel > 50 ? 'yellow' : 'green') : (bin.current_level > 75 ? 'red' : bin.current_level > 50 ? 'yellow' : 'green')}`}>

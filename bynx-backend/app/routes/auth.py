@@ -1,51 +1,51 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from app.database.mysql import get_mysql_connection
-from app.schemas.users import UserCreate, UserLogin
-from app.crud.users import get_user_by_email, create_user
-from app.utils import verify_password
+from datetime import datetime
+import mysql.connector
 
 router = APIRouter()
 
-class LoginRequest(BaseModel):
-    email: str
-    password: str
-
-class RegisterRequest(BaseModel):
+class User(BaseModel):
     name: str
     email: str
     password: str
     role: str
 
-@router.post("/login")
-async def login(request: LoginRequest):
-    connection = get_mysql_connection()
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Users WHERE email = %s", (request.email,))
-    user = cursor.fetchone()
-    connection.close()
-
-    if not user or not verify_password(request.password, user['password']):
-        raise HTTPException(status_code=400, detail="Invalid email or password")
-
-    return {"success": True, "role": user['role']}
+class Login(BaseModel):
+    email: str
+    password: str
 
 @router.post("/register")
-async def register(request: RegisterRequest):
-    connection = get_mysql_connection()
-    cursor = connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Users WHERE email = %s", (request.email,))
-    user = cursor.fetchone()
+def register(user: User):
+    try:
+        connection = get_mysql_connection()
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM Users WHERE email = %s", (user.email,))
+        if cursor.fetchone():
+            raise HTTPException(status_code=400, detail="Email already registered")
+        cursor.execute("""
+            INSERT INTO Users (name, email, password, role, created_at)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user.name, user.email, user.password, user.role, datetime.now()))
+        connection.commit()
+        connection.close()
+        return {"success": True, "message": "User registered successfully"}
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        raise HTTPException(status_code=500, detail=str(err))
 
-    if user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-    hashed_password = hash_password(request.password)
-    cursor.execute("""
-        INSERT INTO Users (name, email, password, role, created_at)
-        VALUES (%s, %s, %s, %s, NOW())
-    """, (request.name, request.email, hashed_password, request.role))
-    connection.commit()
-    connection.close()
-
-    return {"success": True}
+@router.post("/login")
+def login(login: Login):
+    try:
+        connection = get_mysql_connection()
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Users WHERE email = %s", (login.email,))
+        user = cursor.fetchone()
+        connection.close()
+        if not user or user['password'] != login.password:
+            raise HTTPException(status_code=400, detail="Invalid email or password")
+        return {"success": True, "role": user['role']}
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        raise HTTPException(status_code=500, detail=str(err))

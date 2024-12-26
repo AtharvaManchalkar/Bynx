@@ -59,15 +59,25 @@ def create_tables(connection):
         FOREIGN KEY (vehicle_id) REFERENCES Vehicles(vehicle_id)
     )
     """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS Locations (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        latitude DECIMAL(9,6) NOT NULL,
+        longitude DECIMAL(9,6) NOT NULL
+    )
+    """)
     
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS Bins (
         bin_id INT AUTO_INCREMENT PRIMARY KEY,
-        location VARCHAR(255) NOT NULL,
+        location_id INT NOT NULL,
         capacity INT NOT NULL,
         current_level INT NOT NULL,
         status ENUM('Empty', 'Partially Full', 'Full', 'Damaged') NOT NULL,
-        last_collected TIMESTAMP NULL
+        last_collected TIMESTAMP NULL,
+        FOREIGN KEY (location_id) REFERENCES Locations(id)
     )
     """)
     
@@ -129,51 +139,47 @@ def create_tables(connection):
 def insert_initial_data(connection):
     cursor = connection.cursor()
     
+    cursor.execute("SELECT COUNT(*) FROM Locations")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute("""
+        INSERT INTO Locations (name, latitude, longitude)
+        VALUES
+        ('Downtown', 12.9716, 77.5946),
+        ('Uptown', 12.2958, 76.6394),
+        ('Suburb', 11.0168, 76.9558)
+        """)
+ 
     # Insert initial data for Routes
     cursor.execute("SELECT COUNT(*) FROM Routes")
     if cursor.fetchone()[0] == 0:
         cursor.execute("""
         INSERT INTO Routes (start_point, end_point, total_distance)
         VALUES
-        ('Depot', 'Downtown', 10.5),
-        ('Depot', 'Uptown', 15.0),
-        ('Depot', 'Suburb', 20.0)
+        ('Uptown', 'Downtown', 10.5),
+        ('Suburb', 'Uptown', 15.0),
+        ('Uptown', 'Suburb', 20.0)
         """)
     
     # Insert initial data for Bins
     cursor.execute("SELECT COUNT(*) FROM Bins")
     if cursor.fetchone()[0] == 0:
         cursor.execute("""
-        INSERT INTO Bins (location, capacity, current_level, status, last_collected)
+        INSERT INTO Bins (location_id, capacity, current_level, status, last_collected)
         VALUES
-        ('Downtown', 100, 50, 'Partially Full', NOW()),
-        ('Uptown', 200, 100, 'Full', NOW()),
-        ('Suburb', 150, 0, 'Empty', NOW()),
-        ('Central Park', 120, 80, 'Full', NOW()),
-        ('Sector 5', 180, 90, 'Full', NOW()),
-        ('Sector 8', 160, 40, 'Partially Full', NOW()),
-        ('Main Street', 140, 70, 'Partially Full', NOW()),
-        ('Sector 11', 130, 0, 'Empty', NOW()),
-        ('Sector 3', 110, 55, 'Partially Full', NOW()),
-        ('Market Road', 170, 85, 'Full', NOW())
+        (1, 100, 50, 'Partially Full', NOW()),
+        (2, 200, 100, 'Full', NOW()),
+        (3, 150, 0, 'Empty', NOW())
         """)
-    
+
     # Insert initial data for CollectionSchedules
     cursor.execute("SELECT COUNT(*) FROM CollectionSchedules")
     if cursor.fetchone()[0] == 0:
         cursor.execute("""
         INSERT INTO CollectionSchedules (bin_id, route_id, collection_time, status)
-        VALUES
+        VALUES 
         (1, 1, NOW(), 'Scheduled'),
         (2, 2, NOW(), 'Scheduled'),
-        (3, 3, NOW(), 'Scheduled'),
-        (4, 1, NOW(), 'Scheduled'),
-        (5, 2, NOW(), 'Scheduled'),
-        (6, 3, NOW(), 'Scheduled'),
-        (7, 1, NOW(), 'Scheduled'),
-        (8, 2, NOW(), 'Scheduled'),
-        (9, 3, NOW(), 'Scheduled'),
-        (10, 1, NOW(), 'Scheduled')
+        (3, 3, NOW(), 'Scheduled')
         """)
     
     # Insert initial data for Vehicles
@@ -210,11 +216,11 @@ def insert_initial_data(connection):
     cursor.execute("SELECT COUNT(*) FROM Complaints")
     if cursor.fetchone()[0] == 0:
         complaints = [
-            (3, 'Sector 5', 'Bin is overflowing', 'Pending', datetime.now(), None, 'Not yet assigned'),
-            (3, 'Central Park', 'Bin is damaged', 'Resolved', datetime.now(), datetime.now(), 'Worker One'),
-            (4, 'Sector 8', 'Bin is full', 'Pending', datetime.now(), None, 'Not yet assigned'),
-            (5, 'Main Street', 'Bin is partially full', 'Pending', datetime.now(), None, 'Not yet assigned'),
-            (6, 'Sector 11', 'Bin is empty', 'Resolved', datetime.now(), datetime.now(), 'Worker Two')
+            (3, 'Uptown', 'Bin is overflowing', 'Pending', datetime.now(), None, 'Not yet assigned'),
+            (3, 'Uptown', 'Bin is damaged', 'Resolved', datetime.now(), datetime.now(), 'Worker One'),
+            (4, 'Suburb', 'Bin is full', 'Pending', datetime.now(), None, 'Not yet assigned'),
+            (5, 'Downtown', 'Bin is partially full', 'Pending', datetime.now(), None, 'Not yet assigned'),
+            (6, 'Downtown', 'Bin is empty', 'Resolved', datetime.now(), datetime.now(), 'Worker Two')
         ]
         cursor.executemany("""
         INSERT INTO Complaints (user_id, location, description, status, created_at, resolved_at, assigned_to)
@@ -227,9 +233,7 @@ def insert_initial_data(connection):
         maintenance_requests = [
             (1, 'Fix the lid', 'Pending', datetime.now(), None),
             (2, 'Replace the bin', 'Completed', datetime.now(), datetime.now()),
-            (3, 'Repair the base', 'In Progress', datetime.now(), None),
-            (4, 'Fix the handle', 'Pending', datetime.now(), None),
-            (5, 'Replace the cover', 'Completed', datetime.now(), datetime.now())
+            (3, 'Repair the base', 'In Progress', datetime.now(), None)
         ]
         cursor.executemany("""
         INSERT INTO MaintenanceRequests (bin_id, description, status, created_at, completed_at)

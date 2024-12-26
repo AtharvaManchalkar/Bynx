@@ -1,27 +1,48 @@
-from fastapi import APIRouter, HTTPException, Depends
-from typing import List
-from app.schemas.complaints import ComplaintCreate, ComplaintUpdate, ComplaintResponse
-from app.crud.complaints import get_complaints, create_complaint, update_complaint, get_complaints_by_user, get_complaints_for_admin
+from fastapi import APIRouter, HTTPException
+from app.database.mysql import get_mysql_connection
+import mysql.connector
 
 router = APIRouter()
 
-@router.get("/complaints/", response_model=List[ComplaintResponse])
+@router.get("/complaints")
 async def fetch_complaints():
-    return get_complaints()
+    try:
+        connection = get_mysql_connection()
+        cursor = connection.cursor(dictionary=True)
+        query = "SELECT * FROM Complaints"
+        cursor.execute(query)
+        complaints = cursor.fetchall()
+        connection.close()
+        return {"data": complaints}
+    except mysql.connector.Error as err:
+        raise HTTPException(status_code=500, detail=str(err))
 
-@router.get("/complaints/user/{user_id}", response_model=List[ComplaintResponse])
-async def fetch_complaints_by_user(user_id: int):
-    return get_complaints_by_user(user_id)
-
-@router.get("/complaints/admin", response_model=List[ComplaintResponse])
-async def fetch_complaints_for_admin():
-    return get_complaints_for_admin()
-
-@router.post("/complaints/", response_model=int)
-async def add_complaint(complaint: ComplaintCreate):
-    return create_complaint(complaint)
+@router.post("/complaints")
+async def add_complaint(complaint: dict):
+    try:
+        connection = get_mysql_connection()
+        cursor = connection.cursor()
+        query = "INSERT INTO Complaints (user_id, location, description, status, created_at) VALUES (%s, %s, %s, %s, %s)"
+        cursor.execute(query, (complaint['user_id'], complaint['location'], complaint['description'], complaint['status'], complaint['created_at']))
+        connection.commit()
+        complaint_id = cursor.lastrowid
+        connection.close()
+        complaint['complaint_id'] = complaint_id
+        return {"data": complaint}
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        raise HTTPException(status_code=500, detail=str(err))
 
 @router.put("/complaints/{complaint_id}")
-async def update_complaint(complaint_id: int, complaint: ComplaintUpdate):
-    update_complaint(complaint_id, complaint)
-    return {"message": "Complaint updated successfully"}
+async def update_complaint(complaint_id: int, complaint: dict):
+    try:
+        connection = get_mysql_connection()
+        cursor = connection.cursor()
+        query = "UPDATE Complaints SET status = %s, resolved_at = %s, assigned_to = %s WHERE complaint_id = %s"
+        cursor.execute(query, (complaint.get('status'), complaint.get('resolved_at'), complaint.get('assigned_to'), complaint_id))
+        connection.commit()
+        connection.close()
+        return {"message": "Complaint updated successfully"}
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        raise HTTPException(status_code=500, detail=str(err))

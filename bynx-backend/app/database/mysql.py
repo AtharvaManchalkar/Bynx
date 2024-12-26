@@ -8,7 +8,7 @@ load_dotenv()
 
 connection_pool = pooling.MySQLConnectionPool(
     pool_name="mypool",
-    pool_size=5,
+    pool_size=10,
     host=os.getenv('MYSQL_HOST'),
     user=os.getenv('MYSQL_USER'),
     password=os.getenv('MYSQL_PASSWORD'),
@@ -17,4 +17,10 @@ connection_pool = pooling.MySQLConnectionPool(
 )
 
 def get_mysql_connection():
-    return connection_pool.get_connection()
+    try:
+        connection = connection_pool.get_connection()
+        if connection.is_connected():
+            return connection
+    except mysql.connector.Error as e:
+        print(f"Error: {e}")
+        return None
