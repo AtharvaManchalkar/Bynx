@@ -32,8 +32,10 @@ const Register = () => {
                 role: formData.role
             });
             
-            if (response.data.success) {
-                window.location.href = '/login'; // Force full page reload
+            // Check if registration was successful
+            if (response.data) {
+                // Use navigate instead of window.location
+                navigate('/login');
             }
         } catch (error) {
             setError(error.response?.data?.detail || 'Registration failed');
@@ -47,7 +49,6 @@ const Register = () => {
                 <form onSubmit={handleSubmit}>
                     <input
                         type="text"
-                        id="username"
                         name="username"
                         placeholder="Username"
                         value={formData.username}
@@ -56,7 +57,6 @@ const Register = () => {
                     />
                     <input
                         type="email"
-                        id="email"
                         name="email"
                         placeholder="Email"
                         value={formData.email}
@@ -65,7 +65,6 @@ const Register = () => {
                     />
                     <input
                         type="password"
-                        id="password"
                         name="password"
                         placeholder="Password"
                         value={formData.password}
@@ -73,7 +72,6 @@ const Register = () => {
                         required
                     />
                     <select
-                        id="role"
                         name="role"
                         value={formData.role}
                         onChange={handleChange}
