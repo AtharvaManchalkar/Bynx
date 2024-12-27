@@ -102,7 +102,7 @@ def create_tables(connection):
         cost DECIMAL(10,2) NOT NULL,
         maintenance_date TIMESTAMP,
         vehicle_id INT NOT NULL,
-        status ENUM('Pending', 'Resolved') DEFAULT 'Pending',
+        status ENUM('Pending', 'Completed') DEFAULT 'Pending',
         FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id)
     )
     """)

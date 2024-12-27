@@ -5,59 +5,78 @@ import './Maintenance.css';
 const Maintenance = () => {
     const [maintenanceRecords, setMaintenanceRecords] = useState([]);
     const [isMaintenanceFormVisible, setMaintenanceFormVisible] = useState(false);
-    const [newMaintenance, setNewMaintenance] = useState({ details: '', cost: 0, vehicle_id: 1 });
+    const [newMaintenance, setNewMaintenance] = useState({
+        details: '',
+        cost: '',
+        vehicle_id: '',
+        status: 'Pending'
+    });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const userRole = localStorage.getItem('role');
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await API.get("/api/maintenance");
-                setMaintenanceRecords(response.data || []);
-            } catch (error) {
-                console.error("Error fetching maintenance records:", error);
-                setError('Failed to fetch maintenance records');
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const fetchMaintenanceRecords = async () => {
+        try {
+            const response = await API.get("/maintenance");
+            setMaintenanceRecords(response.data || []);
+            setIsLoading(false);
+        } catch (error) {
+            console.error("Error fetching maintenance records:", error);
+            setError('Failed to fetch maintenance records');
+            setIsLoading(false);
+        }
+    };
 
-        fetchData();
+    useEffect(() => {
+        fetchMaintenanceRecords();
     }, []);
 
     const handleMaintenanceSubmit = async (e) => {
         e.preventDefault();
         setError('');
         try {
-            const response = await API.post("/api/maintenance", newMaintenance);
-            setMaintenanceRecords([...maintenanceRecords, response.data]);
-            setNewMaintenance({ details: '', cost: 0, vehicle_id: 1 });
-            setMaintenanceFormVisible(false);
+            const maintenanceData = {
+                details: newMaintenance.details,
+                cost: parseFloat(newMaintenance.cost),
+                vehicle_id: parseInt(newMaintenance.vehicle_id),
+                status: 'Pending'
+            };
+
+            const response = await API.post("/maintenance", maintenanceData);
+            if (response.data) {
+                await fetchMaintenanceRecords();
+                setNewMaintenance({
+                    details: '',
+                    cost: '',
+                    vehicle_id: '',
+                    status: 'Pending'
+                });
+                setMaintenanceFormVisible(false);
+            }
         } catch (error) {
-            console.error("Error adding maintenance record:", error);
-            setError('Failed to add maintenance record');
+            setError('Failed to add maintenance record: ' + (error.response?.data?.detail || error.message));
         }
     };
 
     const handleMarkAsCompleted = async (recordId) => {
         try {
-            const response = await API.put(`/api/maintenance/${recordId}`, { maintenance_date: new Date(), status: 'Resolved' });
-            if (response.status === 200) {
-                const updatedRecords = maintenanceRecords.map(record => 
-                    record.maintenance_id === recordId ? { ...record, maintenance_date: new Date(), status: 'Resolved' } : record
-                );
-                setMaintenanceRecords(updatedRecords);
+            const response = await API.put(`/maintenance/${recordId}`, {
+                status: 'Completed',
+                maintenance_date: new Date().toISOString()
+            });
+
+            if (response.data) {
+                await fetchMaintenanceRecords();
             }
         } catch (error) {
-            console.error("Error marking maintenance as completed:", error);
-            setError('Failed to mark maintenance as completed');
+            setError('Failed to mark as completed: ' + (error.response?.data?.detail || error.message));
         }
     };
 
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
+    // Rest of your component JSX remains the same
     return (
         <div className="maintenance">
             <h1>Maintenance Page</h1>
@@ -78,7 +97,7 @@ const Maintenance = () => {
                                 required
                             >
                                 <option value="">Select Maintenance Type</option>
-                                <option value="Oil change">Oil change</option>
+                                <option value="Oil Change">Oil Change</option>
                                 <option value="Tire Replacement">Tire Replacement</option>
                                 <option value="Brake Repair">Brake Repair</option>
                             </select>
@@ -117,9 +136,9 @@ const Maintenance = () => {
                                     <td>{record.maintenance_id}</td>
                                     <td>{record.details}</td>
                                     <td>{record.cost}</td>
-                                    <td>{record.vehicle_number}</td>
+                                    <td>{record.vehicle_number || record.vehicle_id}</td>
                                     <td>{record.maintenance_date ? new Date(record.maintenance_date).toLocaleString('en-GB') : 'Pending'}</td>
-                                    <td>{record.status}</td>
+                                    <td className={`status ${record.status?.toLowerCase()}`}>{record.status || 'Pending'}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -146,13 +165,18 @@ const Maintenance = () => {
                                 <td>{record.maintenance_id}</td>
                                 <td>{record.details}</td>
                                 <td>{record.cost}</td>
-                                <td>{record.vehicle_number}</td>
+                                <td>{record.vehicle_number || record.vehicle_id}</td>
                                 <td>{record.maintenance_date ? new Date(record.maintenance_date).toLocaleString('en-GB') : 'Pending'}</td>
-                                <td>{record.status}</td>
+                                <td className={`status ${record.status?.toLowerCase()}`}>{record.status || 'Pending'}</td>
                                 <td>
-                                    <button onClick={() => handleMarkAsCompleted(record.maintenance_id)}>
-                                        Mark as Completed
-                                    </button>
+                                    {record.status !== 'Completed' && (
+                                        <button 
+                                            className="complete-button"
+                                            onClick={() => handleMarkAsCompleted(record.maintenance_id)}
+                                        >
+                                            Mark as Completed
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))}
