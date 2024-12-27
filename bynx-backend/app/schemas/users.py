@@ -1,16 +1,26 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+from typing import Optional
+from datetime import datetime
 
-class UserCreate(BaseModel):
+class UserBase(BaseModel):
+    email: EmailStr
     name: str
-    email: str
+    role: str = "User"
+
+class UserCreate(UserBase):
     password: str
-    role: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
 
 class UserResponse(BaseModel):
-    id: int
+    user_id: int
     name: str
-    email: str
+    email: EmailStr
     role: str
+    created_at: Optional[datetime] = None
+    location_id: Optional[int] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True

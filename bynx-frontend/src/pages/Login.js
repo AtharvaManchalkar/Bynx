@@ -23,18 +23,13 @@ const Login = () => {
         setError('');
         
         try {
-            // Remove /api prefix since it's already in axios baseURL
-            const response = await API.post('/login', {
-                email: formData.email,
-                password: formData.password
-            });
+            const response = await API.post('/login', formData);
             
             if (response.data.success) {
                 localStorage.setItem('token', response.data.access_token);
                 localStorage.setItem('role', response.data.role);
                 localStorage.setItem('userId', response.data.userId);
-                navigate('/home');
-                window.location.reload();
+                window.location.href = '/home'; // Force full page reload
             }
         } catch (error) {
             setError(error.response?.data?.detail || 'Login failed');
@@ -48,7 +43,6 @@ const Login = () => {
                 <form onSubmit={handleSubmit}>
                     <input
                         type="email"
-                        id="email"
                         name="email"
                         placeholder="Email"
                         value={formData.email}
@@ -57,7 +51,6 @@ const Login = () => {
                     />
                     <input
                         type="password"
-                        id="password"
                         name="password"
                         placeholder="Password"
                         value={formData.password}
@@ -66,7 +59,7 @@ const Login = () => {
                     />
                     <button type="submit">Login</button>
                 </form>
-                {error && <p className="error-message">{error}</p>}
+                {error && <p className="error-message">{typeof error === 'string' ? error : 'Invalid login attempt'}</p>}
                 <p className="login-message">
                     Don't have an account? <Link to="/register">Register</Link>
                 </p>

@@ -25,7 +25,6 @@ const Register = () => {
         setError('');
         
         try {
-            // Remove /api prefix since it's already in axios baseURL
             const response = await API.post('/register', {
                 name: formData.username,
                 email: formData.email,
@@ -34,9 +33,7 @@ const Register = () => {
             });
             
             if (response.data.success) {
-                navigate('/login');
-            } else {
-                setError(response.data.message || 'Registration failed');
+                window.location.href = '/login'; // Force full page reload
             }
         } catch (error) {
             setError(error.response?.data?.detail || 'Registration failed');
