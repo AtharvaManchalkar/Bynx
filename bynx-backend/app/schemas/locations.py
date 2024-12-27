@@ -1,18 +1,20 @@
 from pydantic import BaseModel
 
-class LocationBase(BaseModel):
-    name: str
+class LocationCreate(BaseModel):
     latitude: float
     longitude: float
+    address: str
 
-class LocationCreate(LocationBase):
-    pass
+class LocationUpdate(BaseModel):
+    latitude: float
+    longitude: float
+    address: str
 
-class LocationUpdate(LocationBase):
-    pass
-
-class LocationResponse(LocationBase):
-    id: int
+class LocationResponse(BaseModel):
+    location_id: int
+    latitude: float
+    longitude: float
+    address: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True

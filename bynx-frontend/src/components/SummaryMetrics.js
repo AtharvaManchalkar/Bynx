@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import API from '../api/axios';
 import './SummaryMetrics.css';
 
 const SummaryMetrics = () => {
@@ -14,8 +14,8 @@ const SummaryMetrics = () => {
     useEffect(() => {
         const fetchMetrics = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/summary-metrics');
-                setMetrics(response.data.data);
+                const response = await API.get('/summary-metrics');
+                setMetrics(response.data);
             } catch (error) {
                 console.error('Error fetching summary metrics:', error);
             }

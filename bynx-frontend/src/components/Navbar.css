@@ -1,4 +1,3 @@
-/* Original Styles */
 nav {
     background-color: var(--navbar-bg-color);
     padding: 10px 15px;
@@ -48,6 +47,33 @@ nav ul li a.active {
     border-radius: 5px;
 }
 
+.logout-button {
+    background: transparent;
+    border: none;
+    color: var(--navbar-button-bg-color);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px;
+}
+
+.logout-button:hover {
+    color: var(--navbar-button-hover-bg-color);
+}
+
+.theme-toggle-button {
+    background: var(--navbar-button-bg-color);
+    color: var(--navbar-button-text-color);
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-left: 10px;
+}
+
+.theme-toggle-button:hover {
+    background: var(--navbar-button-hover-bg-color);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .navbar-title:hover {
@@ -91,31 +117,4 @@ nav ul li a:hover {
     color: lightyellow;
     transform: scale(0.95);
     transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.logout-button {
-    background: transparent;
-    border: none;
-    color: var(--navbar-button-bg-color);
-    cursor: pointer;
-    font-size: 16px;
-    padding: 10px;
-}
-
-.logout-button:hover {
-    color: var(--navbar-button-hover-bg-color);
-}
-
-.theme-toggle-button {
-    background: var(--navbar-button-bg-color);
-    color: var(--navbar-button-text-color);
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-left: 10px;
-}
-
-.theme-toggle-button:hover {
-    background: var(--navbar-button-hover-bg-color);
 }

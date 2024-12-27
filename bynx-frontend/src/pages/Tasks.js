@@ -4,7 +4,7 @@ import "./Tasks.css";
 
 const Tasks = () => {
     const [tasks, setTasks] = useState([]);
-    const workerId = localStorage.getItem('userId'); // Assuming userId is stored in localStorage after login
+    const workerId = parseInt(localStorage.getItem('userId'));
 
     useEffect(() => {
         const fetchTasks = async () => {
@@ -18,55 +18,56 @@ const Tasks = () => {
 
         if (workerId) {
             fetchTasks();
-        } else {
-            console.error("Worker ID is null or undefined");
         }
     }, [workerId]);
 
-    const markTaskCompleted = async (taskId) => {
+    const handleResolveTask = async (complaintId) => {
         try {
-            await API.put(`/tasks/${taskId}`, { status: "completed" });
-            alert("Task marked as completed!");
-            setTasks((prev) =>
-                prev.map((task) =>
-                    task.id === taskId ? { ...task, status: "completed" } : task
+            await API.put(`/tasks/${complaintId}/resolve`);
+            setTasks(prev =>
+                prev.map(task =>
+                    task.complaint_id === complaintId
+                        ? { ...task, status: "Resolved" }
+                        : task
                 )
             );
         } catch (error) {
-            alert("Failed to update task!");
+            console.error("Error resolving task:", error);
         }
     };
 
     return (
         <div className="tasks">
-            <h1>Tasks Page</h1>
+            <h1>Assigned Tasks</h1>
             <table className="tasks-table">
                 <thead>
                     <tr>
                         <th>Complaint ID</th>
                         <th>Location</th>
                         <th>Description</th>
-                        <th>Assigned At</th>
+                        <th>Date Assigned</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {tasks.map((task) => (
-                        <tr key={task.id}>
+                        <tr key={task.complaint_id}>
                             <td>{task.complaint_id}</td>
-                            <td>{task.location}</td>
+                            <td>{task.address}</td>
                             <td>{task.description}</td>
-                            <td>{new Date(task.assigned_at).toLocaleString('en-GB')}</td>
+                            <td>{new Date(task.submitted_at).toLocaleString('en-GB')}</td>
+                            <td>{task.status}</td>
                             <td>
-                                {task.status !== "completed" ? (
+                                {task.status !== "Resolved" ? (
                                     <button
-                                        className="mark-completed-button"
-                                        onClick={() => markTaskCompleted(task.id)}
+                                        className="resolve-button"
+                                        onClick={() => handleResolveTask(task.complaint_id)}
                                     >
-                                        Mark as Completed
+                                        Mark as Resolved
                                     </button>
                                 ) : (
-                                    <span className="completed-status">Completed</span>
+                                    <span className="resolved-status">Resolved</span>
                                 )}
                             </td>
                         </tr>

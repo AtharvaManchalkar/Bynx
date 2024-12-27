@@ -8,39 +8,27 @@ router = APIRouter()
 async def fetch_summary_metrics():
     try:
         connection = get_mysql_connection()
+        if connection is None:
+            raise HTTPException(status_code=500, detail="Failed to connect to the database")
         cursor = connection.cursor(dictionary=True)
-
-        # Fetch total bins
-        cursor.execute("SELECT COUNT(*) AS totalBins FROM Bins")
-        total_bins = cursor.fetchone()['totalBins']
-
-        # Fetch filled bins
-        cursor.execute("SELECT COUNT(*) AS filledBins FROM Bins WHERE status = 'Full'")
-        filled_bins = cursor.fetchone()['filledBins']
-
-        # Fetch pending complaints
-        cursor.execute("SELECT COUNT(*) AS pendingComplaints FROM Complaints WHERE status = 'Pending'")
-        pending_complaints = cursor.fetchone()['pendingComplaints']
-
-        # Fetch scheduled collections
-        cursor.execute("SELECT COUNT(*) AS scheduledCollections FROM CollectionSchedules WHERE status = 'Scheduled'")
-        scheduled_collections = cursor.fetchone()['scheduledCollections']
-
-        # Fetch available vehicles
-        cursor.execute("SELECT COUNT(*) AS availableVehicles FROM Vehicles WHERE status = 'Available'")
-        available_vehicles = cursor.fetchone()['availableVehicles']
-
+        cursor.execute("SELECT COUNT(*) as totalBins FROM WasteBin")
+        totalBins = cursor.fetchone()['totalBins']
+        cursor.execute("SELECT COUNT(*) as filledBins FROM WasteBin WHERE current_level > 75")
+        filledBins = cursor.fetchone()['filledBins']
+        cursor.execute("SELECT COUNT(*) as pendingComplaints FROM Complaint WHERE status = 'Pending'")
+        pendingComplaints = cursor.fetchone()['pendingComplaints']
+        cursor.execute("SELECT COUNT(*) as scheduledCollections FROM WasteCollectionSchedule WHERE status = 'Scheduled'")
+        scheduledCollections = cursor.fetchone()['scheduledCollections']
+        cursor.execute("SELECT COUNT(*) as availableVehicles FROM Vehicle WHERE assigned_worker_id IS NULL")
+        availableVehicles = cursor.fetchone()['availableVehicles']
         connection.close()
-
-        metrics = {
-            "totalBins": total_bins,
-            "filledBins": filled_bins,
-            "pendingComplaints": pending_complaints,
-            "scheduledCollections": scheduled_collections,
-            "availableVehicles": available_vehicles,
+        return {
+            "totalBins": totalBins,
+            "filledBins": filledBins,
+            "pendingComplaints": pendingComplaints,
+            "scheduledCollections": scheduledCollections,
+            "availableVehicles": availableVehicles
         }
-
-        return {"data": metrics}
     except mysql.connector.Error as err:
-        print(f"Error fetching summary metrics: {err}")
+        print(f"Error: {err}")
         raise HTTPException(status_code=500, detail=str(err))

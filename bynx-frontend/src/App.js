@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { applyTheme } from "./components/theme";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import HomeDashboard from "./pages/HomeDashboard";
 import BinManagement from "./pages/BinManagement";
@@ -14,42 +13,20 @@ import Tasks from "./pages/Tasks";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
-const PrivateRoute = ({ children, roles }) => {
-    const userRole = localStorage.getItem('userRole');
-    if (!userRole) {
-        return <Navigate to="/login" />;
-    }
-    if (roles && !roles.includes(userRole)) {
-        return <Navigate to="/home" />;
-    }
-    return children;
-};
-
-const PublicRoute = ({ children }) => {
-    const userRole = localStorage.getItem('userRole');
-    const location = useLocation();
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        if (userRole && (location.pathname === '/login' || location.pathname === '/register')) {
-            navigate('/home');
-        }
-    }, [userRole, location, navigate]);
-
-    return children;
-};
-
 const App = () => {
     const [theme, setTheme] = useState('light');
+    const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+    const [userRole, setUserRole] = useState(localStorage.getItem('role'));
 
     useEffect(() => {
-        applyTheme(theme + '-theme');
-    }, [theme]);
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        setIsAuthenticated(!!token);
+        setUserRole(role);
+    }, []);
 
     const toggleTheme = () => {
-        const newTheme = theme === 'light' ? 'dark' : 'light';
-        setTheme(newTheme);
-        applyTheme(newTheme + '-theme');
+        setTheme(theme === 'light' ? 'dark' : 'light');
     };
 
     return (
@@ -58,17 +35,48 @@ const App = () => {
                 <div>
                     <Navbar toggleTheme={toggleTheme} />
                     <Routes>
-                        <Route path="/" element={<Navigate to="/login" />} />
-                        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-                        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-                        <Route path="/home" element={<PrivateRoute roles={['Admin', 'Worker', 'User']}><HomeDashboard /></PrivateRoute>} />
-                        <Route path="/reports" element={<PrivateRoute roles={['Admin', 'Worker', 'User']}><Reports /></PrivateRoute>} />
-                        <Route path="/complaints" element={<PrivateRoute roles={['Admin', 'User']}><Complaints /></PrivateRoute>} />
-                        <Route path="/maintenance" element={<PrivateRoute roles={['Admin', 'Worker']}><Maintenance /></PrivateRoute>} />
-                        <Route path="/tasks" element={<PrivateRoute roles={['Worker']}><Tasks /></PrivateRoute>} />
-                        <Route path="/bin-management" element={<PrivateRoute roles={['Admin', 'Worker']}><BinManagement /></PrivateRoute>} />
-                        <Route path="/collection-routes" element={<PrivateRoute roles={['Admin', 'Worker']}><CollectionRoutes /></PrivateRoute>} />
-                        <Route path="/dashboard" element={<PrivateRoute roles={['Admin', 'Worker']}><HomeDashboard /></PrivateRoute>} />
+                        <Route path="/" element={!isAuthenticated ? <Navigate to="/login" /> : <Navigate to="/home" />} />
+                        <Route path="/login" element={isAuthenticated ? <Navigate to="/home" /> : <Login />} />
+                        <Route path="/register" element={isAuthenticated ? <Navigate to="/home" /> : <Register />} />
+                        
+                        <Route path="/home" element={!isAuthenticated ? <Navigate to="/login" /> : <HomeDashboard />} />
+                        
+                        <Route path="/bin-management" element={
+                            !isAuthenticated ? <Navigate to="/login" /> :
+                            !['Admin', 'Worker'].includes(userRole) ? <Navigate to="/unauthorized" /> :
+                            <BinManagement />
+                        } />
+                        
+                        <Route path="/collection-routes" element={
+                            !isAuthenticated ? <Navigate to="/login" /> :
+                            !['Admin', 'Worker', 'User'].includes(userRole) ? <Navigate to="/unauthorized" /> :
+                            <CollectionRoutes />
+                        } />
+                        
+                        <Route path="/reports" element={
+                            !isAuthenticated ? <Navigate to="/login" /> :
+                            <Reports />
+                        } />
+                        
+                        <Route path="/complaints" element={
+                            !isAuthenticated ? <Navigate to="/login" /> :
+                            !['Admin', 'User'].includes(userRole) ? <Navigate to="/unauthorized" /> :
+                            <Complaints />
+                        } />
+                        
+                        <Route path="/maintenance" element={
+                            !isAuthenticated ? <Navigate to="/login" /> :
+                            !['Admin', 'Worker'].includes(userRole) ? <Navigate to="/unauthorized" /> :
+                            <Maintenance />
+                        } />
+                        
+                        <Route path="/tasks" element={
+                            !isAuthenticated ? <Navigate to="/login" /> :
+                            userRole !== 'Worker' ? <Navigate to="/unauthorized" /> :
+                            <Tasks />
+                        } />
+                        
+                        <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </div>

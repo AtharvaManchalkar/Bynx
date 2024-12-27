@@ -4,23 +4,42 @@ import API from "../api/axios";
 import './Register.css';
 
 const Register = () => {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [role, setRole] = useState('User');
+    const [formData, setFormData] = useState({
+        username: '',
+        email: '',
+        password: '',
+        role: 'User'
+    });
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    const handleRegister = async (e) => {
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+        
         try {
-            const response = await API.post('/register', { name: username, email, password, role });
+            // Remove /api prefix since it's already in axios baseURL
+            const response = await API.post('/register', {
+                name: formData.username,
+                email: formData.email,
+                password: formData.password,
+                role: formData.role
+            });
+            
             if (response.data.success) {
                 navigate('/login');
             } else {
-                alert(response.data.message);
+                setError(response.data.message || 'Registration failed');
             }
         } catch (error) {
-            console.error('Error registering:', error);
+            setError(error.response?.data?.detail || 'Registration failed');
         }
     };
 
@@ -28,14 +47,14 @@ const Register = () => {
         <div className="auth-container">
             <div className="login">
                 <h1>Register</h1>
-                <form onSubmit={handleRegister}>
+                <form onSubmit={handleSubmit}>
                     <input
                         type="text"
                         id="username"
                         name="username"
                         placeholder="Username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        value={formData.username}
+                        onChange={handleChange}
                         required
                     />
                     <input
@@ -43,8 +62,8 @@ const Register = () => {
                         id="email"
                         name="email"
                         placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={formData.email}
+                        onChange={handleChange}
                         required
                     />
                     <input
@@ -52,15 +71,15 @@ const Register = () => {
                         id="password"
                         name="password"
                         placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        value={formData.password}
+                        onChange={handleChange}
                         required
                     />
                     <select
                         id="role"
                         name="role"
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
+                        value={formData.role}
+                        onChange={handleChange}
                         required
                     >
                         <option value="User">User</option>
@@ -69,7 +88,10 @@ const Register = () => {
                     </select>
                     <button type="submit">Register</button>
                 </form>
-                <p className="login-message">Already have an account? <Link to="/login">Login</Link></p>
+                {error && <p className="error-message">{error}</p>}
+                <p className="login-message">
+                    Already have an account? <Link to="/login">Login</Link>
+                </p>
             </div>
         </div>
     );

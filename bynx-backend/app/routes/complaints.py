@@ -1,48 +1,46 @@
-from fastapi import APIRouter, HTTPException
-from app.database.mysql import get_mysql_connection
-import mysql.connector
+from fastapi import APIRouter, HTTPException, Depends
+from typing import List
+from app.schemas.complaints import ComplaintCreate, ComplaintUpdate, ComplaintResponse
+from app.crud.complaints import get_complaints, get_complaints_by_user, create_complaint, update_complaint
+from app.auth.auth_handler import get_user_role
+from datetime import datetime
 
 router = APIRouter()
 
-@router.get("/complaints")
-async def fetch_complaints():
-    try:
-        connection = get_mysql_connection()
-        cursor = connection.cursor(dictionary=True)
-        query = "SELECT * FROM Complaints"
-        cursor.execute(query)
-        complaints = cursor.fetchall()
-        connection.close()
-        return {"data": complaints}
-    except mysql.connector.Error as err:
-        raise HTTPException(status_code=500, detail=str(err))
+@router.get("/complaints", response_model=List[ComplaintResponse])
+async def fetch_complaints(role: str = Depends(get_user_role)):
+    if role not in ['Admin', 'Worker']:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return get_complaints()
 
-@router.post("/complaints")
-async def add_complaint(complaint: dict):
-    try:
-        connection = get_mysql_connection()
-        cursor = connection.cursor()
-        query = "INSERT INTO Complaints (user_id, location, description, status, created_at) VALUES (%s, %s, %s, %s, %s)"
-        cursor.execute(query, (complaint['user_id'], complaint['location'], complaint['description'], complaint['status'], complaint['created_at']))
-        connection.commit()
-        complaint_id = cursor.lastrowid
-        connection.close()
-        complaint['complaint_id'] = complaint_id
-        return {"data": complaint}
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-        raise HTTPException(status_code=500, detail=str(err))
+@router.get("/complaints/user/{user_id}", response_model=List[ComplaintResponse])
+async def fetch_complaints_by_user(user_id: int, role: str = Depends(get_user_role)):
+    if role not in ['Admin', 'User']:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return get_complaints_by_user(user_id)
+
+@router.post("/complaints", response_model=ComplaintResponse)
+async def add_complaint(complaint: ComplaintCreate, role: str = Depends(get_user_role)):
+    if role not in ['Admin', 'User']:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    complaint_id = create_complaint(complaint)
+    return {
+        "complaint_id": complaint_id,
+        **complaint.dict(),
+        "submitted_at": datetime.now(),
+        "resolved_at": None,
+        "assigned_to": None,
+        "worker_id": None,
+        "location_id": None,
+        "address": get_user_address(complaint.user_id)
+    }
 
 @router.put("/complaints/{complaint_id}")
-async def update_complaint(complaint_id: int, complaint: dict):
+async def update_existing_complaint(complaint_id: int, complaint: ComplaintUpdate, role: str = Depends(get_user_role)):
+    if role not in ['Admin', 'Worker']:
+        raise HTTPException(status_code=403, detail="Not authorized")
     try:
-        connection = get_mysql_connection()
-        cursor = connection.cursor()
-        query = "UPDATE Complaints SET status = %s, resolved_at = %s, assigned_to = %s WHERE complaint_id = %s"
-        cursor.execute(query, (complaint.get('status'), complaint.get('resolved_at'), complaint.get('assigned_to'), complaint_id))
-        connection.commit()
-        connection.close()
+        update_complaint(complaint_id, complaint)
         return {"message": "Complaint updated successfully"}
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-        raise HTTPException(status_code=500, detail=str(err))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

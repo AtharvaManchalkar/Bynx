@@ -26,61 +26,11 @@ const CollectionRoutes = () => {
     const [routingControl, setRoutingControl] = useState(null);
     const mapRef = useRef(null);
 
-    const createRoadRoute = (route, map, color) => {
-        const waypoints = route.map(bin => 
-            L.latLng(bin.location.latitude, bin.location.longitude)
-        );
-        
-        const control = L.Routing.control({
-            waypoints: waypoints,
-            routeWhileDragging: false,
-            lineOptions: {
-                styles: [{ color: color, weight: 4, opacity: 0.7 }],
-                zIndex: 1 // Set lower z-index for routes
-            },
-            addWaypoints: false,
-            draggableWaypoints: false,
-            fitSelectedRoutes: true,
-            showAlternatives: false
-        });
-    
-        control.on('routesfound', () => {
-            const routingContainer = document.querySelector('.leaflet-routing-container');
-            if (routingContainer) {
-                document.getElementById('routing-container').appendChild(routingContainer);
-            }
-        });
-    
-        return control.addTo(map);
-    };
-    
-    const RouteInstructions = ({ routeData }) => {
-        return (
-            <div className="route-instructions">
-                {routeData.map((route, index) => (
-                    <div key={index} className="route-container">
-                        <h4 style={{ color: route.color }}>
-                            {index === 0 ? 'Urgent Route' : 'Normal Route'} Instructions
-                        </h4>
-                        <div className="waypoints-list">
-                            {route.waypoints.map((waypoint, idx) => (
-                                <div key={idx} className="waypoint-item">
-                                    <span>Stop {idx + 1}</span>
-                                    <span>Lat: {waypoint.lat.toFixed(4)}, Lng: {waypoint.lng.toFixed(4)}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                ))}
-            </div>
-        );
-    };
-    
     useEffect(() => {
         const fetchBins = async () => {
             try {
                 const response = await API.get('/bins');
-                setBins(response.data);
+                setBins(response.data.data);
             } catch (error) {
                 console.error('Error fetching bins:', error);
             }
@@ -141,6 +91,34 @@ const CollectionRoutes = () => {
         }, [map]);
         
         return null;
+    };
+
+    const createRoadRoute = (route, map, color) => {
+        const waypoints = route.map(bin => 
+            L.latLng(bin.location.latitude, bin.location.longitude)
+        );
+        
+        const control = L.Routing.control({
+            waypoints: waypoints,
+            routeWhileDragging: false,
+            lineOptions: {
+                styles: [{ color: color, weight: 4, opacity: 0.7 }],
+                zIndex: 1 // Set lower z-index for routes
+            },
+            addWaypoints: false,
+            draggableWaypoints: false,
+            fitSelectedRoutes: true,
+            showAlternatives: false
+        });
+    
+        control.on('routesfound', () => {
+            const routingContainer = document.querySelector('.leaflet-routing-container');
+            if (routingContainer) {
+                document.getElementById('routing-container').appendChild(routingContainer);
+            }
+        });
+    
+        return control.addTo(map);
     };
 
     return (

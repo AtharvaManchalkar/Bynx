@@ -9,15 +9,14 @@ load_dotenv()
 def create_connection():
     try:
         connection = mysql.connector.connect(
-            host=os.getenv('MYSQL_HOST'),
-            user=os.getenv('MYSQL_USER'),
-            password=os.getenv('MYSQL_PASSWORD'),
-            database=os.getenv('MYSQL_DATABASE'),
-            port=os.getenv('MYSQL_PORT')
+            host=os.getenv("MYSQL_HOST"),
+            user=os.getenv("MYSQL_USER"),
+            password=os.getenv("MYSQL_PASSWORD"),
+            database=os.getenv("MYSQL_DATABASE")
         )
         if connection.is_connected():
             print("Connected to MySQL database")
-        return connection
+            return connection
     except Error as e:
         print(f"Error: {e}")
         return None
@@ -35,7 +34,7 @@ def create_tables(connection):
     """)
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS User (
+    CREATE TABLE IF NOT EXISTS Users (
         user_id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         role ENUM('Admin', 'Worker', 'User') NOT NULL,
@@ -56,7 +55,7 @@ def create_tables(connection):
         last_maintenance TIMESTAMP,
         assigned_worker_id INT,
         location_id INT,
-        FOREIGN KEY (assigned_worker_id) REFERENCES User(user_id),
+        FOREIGN KEY (assigned_worker_id) REFERENCES Users(user_id),
         FOREIGN KEY (location_id) REFERENCES Location(location_id)
     )
     """)
@@ -101,8 +100,9 @@ def create_tables(connection):
         maintenance_id INT AUTO_INCREMENT PRIMARY KEY,
         details TEXT NOT NULL,
         cost DECIMAL(10,2) NOT NULL,
-        maintenance_date TIMESTAMP NOT NULL,
+        maintenance_date TIMESTAMP,
         vehicle_id INT NOT NULL,
+        status ENUM('Pending', 'Resolved') DEFAULT 'Pending',
         FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id)
     )
     """)
@@ -113,11 +113,13 @@ def create_tables(connection):
         description TEXT NOT NULL,
         submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         resolved_at TIMESTAMP,
-        status ENUM('Pending', 'Resolved') DEFAULT 'Pending',
+        status ENUM('Pending','Assigned', 'Resolved') DEFAULT 'Pending',
         user_id INT NOT NULL,
-        bin_id INT NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES User(user_id),
-        FOREIGN KEY (bin_id) REFERENCES WasteBin(bin_id)
+        location_id INT NOT NULL,
+        assigned_to VARCHAR(100),
+        worker_id INT,
+        FOREIGN KEY (user_id) REFERENCES Users(user_id),
+        FOREIGN KEY (location_id) REFERENCES Location(location_id)
     )
     """)
 
@@ -130,7 +132,7 @@ def create_tables(connection):
         worker_id INT NOT NULL,
         vehicle_id INT NOT NULL,
         bin_id INT NOT NULL,
-        FOREIGN KEY (worker_id) REFERENCES User(user_id),
+        FOREIGN KEY (worker_id) REFERENCES Users(user_id),
         FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
         FOREIGN KEY (bin_id) REFERENCES WasteBin(bin_id)
     )
@@ -161,16 +163,16 @@ def insert_initial_data(connection):
         (19.0760, 72.8777, 'Mumbai, India')
         """)
 
-    # Insert initial data for User
-    cursor.execute("SELECT COUNT(*) FROM User")
+    # Insert initial data for Users
+    cursor.execute("SELECT COUNT(*) FROM Users")
     if cursor.fetchone()[0] == 0:
         users = [
-            ("Admin User", "Admin", "admin@example.com", "1234567890", "adminpassword", 1),
-            ("Worker User", "Worker", "worker@example.com", "0987654321", "workerpassword", 2),
-            ("Regular User", "User", "user@example.com", "1122334455", "userpassword", 3)
+            ("Admin User", "Admin", "admin@example.com", "1234567890", "admin", 1),
+            ("Worker User", "Worker", "worker@example.com", "0987654321", "worker", 2),
+            ("Regular User", "User", "user@example.com", "1122334455", "user", 3)
         ]
         cursor.executemany("""
-        INSERT INTO User (name, role, email, phone, password, location_id)
+        INSERT INTO Users (name, role, email, phone, password, location_id)
         VALUES (%s, %s, %s, %s, %s, %s)
         """, users)
 
@@ -191,9 +193,9 @@ def insert_initial_data(connection):
         cursor.execute("""
         INSERT INTO WasteBin (current_level, last_emptied, type, location_id, vehicle_id)
         VALUES
-        (50, NOW(), 'Recyclable', 1, 1),
-        (100, NOW(), 'Organic', 2, 2),
-        (0, NOW(), 'General', 3, 3)
+        (50, NOW(), 'General', 1, 1),
+        (75, NOW(), 'Recyclable', 2, 2),
+        (30, NOW(), 'Organic', 3, 3)
         """)
 
     # Insert initial data for WasteProcessingCenter
@@ -202,9 +204,9 @@ def insert_initial_data(connection):
         cursor.execute("""
         INSERT INTO WasteProcessingCenter (address, processing_type, capacity, contact_no)
         VALUES
-        ('123 Main St', 'Recycling', 5000, '1234567890'),
-        ('456 Elm St', 'Composting', 3000, '0987654321'),
-        ('789 Oak St', 'Incineration', 4000, '1122334455')
+        ('123 Main St', 'Recycling', 500, '123-456-7890'),
+        ('456 Elm St', 'Composting', 300, '987-654-3210'),
+        ('789 Oak St', 'Incineration', 700, '555-555-5555')
         """)
 
     # Insert initial data for WasteRecord
@@ -233,11 +235,11 @@ def insert_initial_data(connection):
     cursor.execute("SELECT COUNT(*) FROM Complaint")
     if cursor.fetchone()[0] == 0:
         cursor.execute("""
-        INSERT INTO Complaint (description, submitted_at, resolved_at, status, user_id, bin_id)
+        INSERT INTO Complaint (description, submitted_at, resolved_at, status, user_id, location_id, assigned_to, worker_id)
         VALUES
-        ('Bin is overflowing', NOW(), NULL, 'Pending', 3, 1),
-        ('Bin is damaged', NOW(), NOW(), 'Resolved', 3, 2),
-        ('Bin is not emptied', NOW(), NULL, 'Pending', 3, 3)
+        ('Bin is overflowing', NOW(), NULL, 'Pending', 3, 1, NULL, NULL),
+        ('Bin is damaged', NOW(), NOW(), 'Resolved', 3, 2, 'Worker User', 2),
+        ('Bin is not emptied', NOW(), NULL, 'Pending', 3, 3, NULL, NULL)
         """)
 
     # Insert initial data for WasteCollectionSchedule
@@ -259,7 +261,7 @@ def insert_initial_data(connection):
         VALUES
         ('Overflow', 1),
         ('Damage', 2),
-        ('Not Emptied', 3)
+        ('Maintenance', 3)
         """)
 
     connection.commit()

@@ -3,25 +3,18 @@ from typing import Optional
 from datetime import datetime
 
 class TaskBase(BaseModel):
-    description: str
-    status: str
-
-class TaskCreate(TaskBase):
     complaint_id: int
-    location: str
-    worker_id: int
-    assigned_at: datetime = datetime.now()
+    status: str
 
 class TaskUpdate(BaseModel):
-    status: str
+    status: str = "Resolved"
+    resolved_at: datetime = datetime.now()
 
-class TaskResponse(TaskBase):
-    id: str
+class TaskResponse(BaseModel):
     complaint_id: int
-    location: str
-    worker_id: int
-    assigned_at: datetime
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
+    description: str
+    submitted_at: datetime
+    resolved_at: Optional[datetime]
+    status: str
+    location_id: Optional[int]
+    address: Optional[str]

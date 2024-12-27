@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from app.database.mysql import get_mysql_connection
 from datetime import datetime
 import mysql.connector
+from app.auth.auth_handler import create_access_token
 
 router = APIRouter()
 
@@ -43,9 +44,17 @@ def login(login: Login):
         cursor.execute("SELECT * FROM Users WHERE email = %s", (login.email,))
         user = cursor.fetchone()
         connection.close()
+        
         if not user or user['password'] != login.password:
             raise HTTPException(status_code=400, detail="Invalid email or password")
-        return {"success": True, "role": user['role']}
+        
+        access_token = create_access_token(data={"sub": user["email"], "role": user["role"]})
+        return {
+            "success": True,
+            "access_token": access_token,
+            "role": user['role'],
+            "userId": user['user_id']
+        }
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         raise HTTPException(status_code=500, detail=str(err))

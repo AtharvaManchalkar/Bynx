@@ -4,27 +4,40 @@ import API from "../api/axios";
 import "./Login.css";
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [formData, setFormData] = useState({
+        email: '',
+        password: ''
+    });
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    const handleLogin = async (e) => {
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+        
         try {
-            const response = await API.post('/login', { email, password });
+            // Remove /api prefix since it's already in axios baseURL
+            const response = await API.post('/login', {
+                email: formData.email,
+                password: formData.password
+            });
+            
             if (response.data.success) {
-                const { role } = response.data;
-                localStorage.setItem('userRole', role);
-                if (role === 'User') {
-                    navigate('/home');
-                } else {
-                    navigate('/dashboard');
-                }
-            } else {
-                alert(response.data.message);
+                localStorage.setItem('token', response.data.access_token);
+                localStorage.setItem('role', response.data.role);
+                localStorage.setItem('userId', response.data.userId);
+                navigate('/home');
+                window.location.reload();
             }
         } catch (error) {
-            console.error('Error logging in:', error);
+            setError(error.response?.data?.detail || 'Login failed');
         }
     };
 
@@ -32,14 +45,14 @@ const Login = () => {
         <div className="auth-container">
             <div className="login">
                 <h1>Login</h1>
-                <form onSubmit={handleLogin}>
+                <form onSubmit={handleSubmit}>
                     <input
                         type="email"
                         id="email"
                         name="email"
                         placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={formData.email}
+                        onChange={handleChange}
                         required
                     />
                     <input
@@ -47,13 +60,16 @@ const Login = () => {
                         id="password"
                         name="password"
                         placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        value={formData.password}
+                        onChange={handleChange}
                         required
                     />
                     <button type="submit">Login</button>
                 </form>
-                <p className="login-message">Don't have an account? <Link to="/register">Register</Link></p>
+                {error && <p className="error-message">{error}</p>}
+                <p className="login-message">
+                    Don't have an account? <Link to="/register">Register</Link>
+                </p>
             </div>
         </div>
     );

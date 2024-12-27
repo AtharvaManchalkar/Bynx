@@ -4,7 +4,7 @@ import './Navbar.css';
 
 const Navbar = ({ toggleTheme }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const userRole = localStorage.getItem('userRole');
+  const userRole = localStorage.getItem('role');
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -17,8 +17,9 @@ const Navbar = ({ toggleTheme }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('userRole');
+    localStorage.clear();
     navigate('/login');
+    window.location.reload(); // Force reload to update auth state
   };
 
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
@@ -28,9 +29,7 @@ const Navbar = ({ toggleTheme }) => {
       <div className="navbar-title" onClick={toggleMenu}>
         BYNX
       </div>
-      {isAuthPage ? (
-        <button onClick={toggleTheme} className="theme-toggle-button">Toggle Theme</button>
-      ) : (
+      {!isAuthPage && (
         <>
           <ul>
             <li>
@@ -43,21 +42,18 @@ const Navbar = ({ toggleTheme }) => {
                 Reports
               </Link>
             </li>
-            <li>
-              <Link to="/complaints" onClick={closeMenu}>
-                Complaints
-              </Link>
-            </li>
-            {userRole !== 'User' && (
+            {userRole !== 'Worker' && (
+              <li>
+                <Link to="/complaints" onClick={closeMenu}>
+                  Complaints
+                </Link>
+              </li>
+            )}
+            {userRole === 'Admin' && (
               <>
                 <li>
                   <Link to="/maintenance" onClick={closeMenu}>
                     Maintenance
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/tasks" onClick={closeMenu}>
-                    Tasks
                   </Link>
                 </li>
                 <li>
@@ -72,15 +68,48 @@ const Navbar = ({ toggleTheme }) => {
                 </li>
               </>
             )}
+            {userRole === 'Worker' && (
+              <>
+                <li>
+                  <Link to="/tasks" onClick={closeMenu}>
+                    Tasks
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/maintenance" onClick={closeMenu}>
+                    Maintenance
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/bin-management" onClick={closeMenu}>
+                    Bin Management
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/collection-routes" onClick={closeMenu}>
+                    Collection Routes
+                  </Link>
+                </li>
+              </>
+            )}
+            {userRole === 'User' && (
+              <>
+                <li>
+                  <Link to="/collection-routes" onClick={closeMenu}>
+                    Collection Routes
+                  </Link>
+                </li>
+              </>
+            )}
             <li>
               <button onClick={handleLogout} className="logout-button">
                 Logout
               </button>
             </li>
           </ul>
-          <button onClick={toggleTheme} className="theme-toggle-button">Toggle Theme</button>
         </>
       )}
+      <button onClick={toggleTheme} className="theme-toggle-button">Toggle Theme</button>
     </nav>
   );
 };

@@ -1,23 +1,27 @@
 from fastapi import APIRouter, HTTPException
 from typing import List
-from app.schemas.tasks import TaskCreate, TaskUpdate, TaskResponse
-from app.crud.tasks import get_tasks, create_task, update_task, get_tasks_by_worker
+from app.schemas.tasks import TaskResponse, TaskUpdate
+from app.crud.tasks import get_tasks_by_worker, resolve_task
+from datetime import datetime
 
 router = APIRouter()
 
-@router.get("/tasks/", response_model=List[TaskResponse])
-async def fetch_tasks():
-    return get_tasks()
-
 @router.get("/tasks/worker/{worker_id}", response_model=List[TaskResponse])
-async def fetch_tasks_by_worker(worker_id: int):
-    return get_tasks_by_worker(worker_id)
+async def get_worker_tasks(worker_id: int):
+    try:
+        tasks = get_tasks_by_worker(worker_id)
+        if not tasks:
+            return []
+        return tasks
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/tasks/", response_model=int)
-async def add_task(task: TaskCreate):
-    return create_task(task)
-
-@router.put("/tasks/{task_id}")
-async def mark_task_completed(task_id: int, task: TaskUpdate):
-    update_task(task_id, task)
-    return {"message": "Task updated successfully"}
+@router.put("/tasks/{complaint_id}/resolve")
+async def resolve_worker_task(complaint_id: int):
+    try:
+        success = resolve_task(complaint_id)
+        if not success:
+            raise HTTPException(status_code=400, detail="Failed to resolve task")
+        return {"message": "Task resolved successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

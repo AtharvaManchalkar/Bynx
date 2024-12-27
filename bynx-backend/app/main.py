@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import bins, tasks, complaints, users, announcements, auth, summary_metrics, maintenance_requests, report_data
+from app.routes import bins, tasks, complaints, users, announcements, auth, summary_metrics, maintenance_requests, report_data, waste_processing_centers, waste_records, maintenance_records, waste_collection_schedules, alerts, maintenance
 from dotenv import load_dotenv
 import subprocess
 
@@ -15,19 +15,25 @@ app = FastAPI()
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this to your frontend's URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include the routers
-app.include_router(auth.router)
-app.include_router(summary_metrics.router)
-app.include_router(complaints.router)
-app.include_router(maintenance_requests.router)
-app.include_router(report_data.router)
-app.include_router(bins.router)
-app.include_router(tasks.router)
-app.include_router(users.router)
-app.include_router(announcements.router)
+# Include routers
+app.include_router(bins.router, prefix="/api")
+app.include_router(tasks.router, prefix="/api")
+app.include_router(complaints.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
+app.include_router(announcements.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")
+app.include_router(summary_metrics.router, prefix="/api")
+app.include_router(maintenance_requests.router, prefix="/api")
+app.include_router(report_data.router, prefix="/api")
+app.include_router(waste_processing_centers.router, prefix="/api")
+app.include_router(waste_records.router, prefix="/api")
+app.include_router(maintenance_records.router, prefix="/api")
+app.include_router(waste_collection_schedules.router, prefix="/api")
+app.include_router(alerts.router, prefix="/api")
+app.include_router(maintenance.router, prefix="/api")
