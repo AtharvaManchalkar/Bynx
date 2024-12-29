@@ -2,6 +2,53 @@ import React, { useState, useEffect } from 'react';
 import './Complaints.css';
 import API from "../api/axios";
 
+const ComplaintCard = ({ complaint, workers, handleAssignWorker, userRole }) => {
+    const formatDate = (date) => new Date(date).toLocaleString('en-GB');
+    
+    return (
+        <div className="complaint-card">
+            <div className="complaint-header">
+                <span className="complaint-id">#{complaint.complaint_id}</span>
+                <span className={`complaint-status status-${complaint.status.toLowerCase()}`}>
+                    {complaint.status}
+                </span>
+            </div>
+            <div className="complaint-body">
+                <p className="complaint-description">{complaint.description}</p>
+                <div className="complaint-meta">
+                    <div>Submitted: {formatDate(complaint.submitted_at)}</div>
+                    {complaint.address && <div>Location: {complaint.address}</div>}
+                </div>
+            </div>
+            {userRole === 'Admin' && (
+                <div className="complaint-footer">
+                    {complaint.assigned_to ? (
+                        <div>Assigned to: {complaint.assigned_to}</div>
+                    ) : (
+                        <select
+                            className="worker-select"
+                            value=""
+                            onChange={(e) => {
+                                const selectedWorker = workers.find(w => w.name === e.target.value);
+                                if (selectedWorker) {
+                                    handleAssignWorker(complaint.complaint_id, selectedWorker);
+                                }
+                            }}
+                        >
+                            <option value="">Assign Worker</option>
+                            {workers.map((worker) => (
+                                <option key={worker.user_id} value={worker.name}>
+                                    {worker.name}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+};
+
 const Complaints = () => {
     const [complaints, setComplaints] = useState([]);
     const [isComplaintFormVisible, setComplaintFormVisible] = useState(false);
@@ -42,6 +89,8 @@ const Complaints = () => {
 
     const handleComplaintSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+
         const complaintData = {
             user_id: userId,
             description: newComplaint.description,
@@ -50,11 +99,15 @@ const Complaints = () => {
 
         try {
             const response = await API.post("/complaints", complaintData);
-            setComplaints([...complaints, response.data]);
+            const endpoint = `/complaints/user/${userId}`;
+            const refreshResponse = await API.get(endpoint);
+            setComplaints(refreshResponse.data || []);
             setNewComplaint({ description: '' });
             setComplaintFormVisible(false);
         } catch (error) {
             console.error("Error adding complaint:", error);
+            setError('Failed to add complaint: ' + (error.response?.data?.detail || 'Unknown error'));
+            setTimeout(() => setError(null), 3000);
         }
     };
 
@@ -68,30 +121,29 @@ const Complaints = () => {
             const response = await API.put(`/complaints/${complaintId}`, updateData);
             
             if (response.status === 200) {
-                // Refresh complaints to get updated worker_id
                 const endpoint = userRole === 'Admin' ? "/complaints" : `/complaints/user/${userId}`;
                 const refreshResponse = await API.get(endpoint);
                 setComplaints(refreshResponse.data || []);
             }
         } catch (error) {
             console.error("Error assigning worker:", error);
+            setError('Failed to assign worker: ' + (error.response?.data?.detail || 'Unknown error'));
+            setTimeout(() => setError(null), 3000);
         }
     };
 
     if (isLoading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
+    if (error) return <div className="error-message">Error: {error}</div>;
 
     return (
         <div className="complaints">
-            <h1>Complaints Page</h1>
+            <h1>Complaints</h1>
 
             {userRole === 'User' && (
-                <>
-                    <div className="section-header">
-                        <button className="add-button" onClick={() => setComplaintFormVisible(!isComplaintFormVisible)}>
-                            + Lodge a Complaint
-                        </button>
-                    </div>
+                <div className="user-section">
+                    <button className="add-button" onClick={() => setComplaintFormVisible(!isComplaintFormVisible)}>
+                        + Lodge a Complaint
+                    </button>
 
                     {isComplaintFormVisible && (
                         <form className="complaint-form" onSubmit={handleComplaintSubmit}>
@@ -102,86 +154,23 @@ const Complaints = () => {
                                 onChange={(e) => setNewComplaint({ description: e.target.value })} 
                                 required
                             />
-                            <button type="submit">Submit</button>
+                            <button type="submit" className="add-button">Submit</button>
                         </form>
                     )}
-
-                    <table className="complaints-table">
-                        <thead>
-                            <tr>
-                                <th>Complaint ID</th>
-                                <th>Location</th>
-                                <th>Description</th>
-                                <th>Date Submitted</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {complaints.map((complaint) => (
-                                <tr key={complaint.complaint_id}>
-                                    <td>{complaint.complaint_id}</td>
-                                    <td>{complaint.address}</td>
-                                    <td>{complaint.description}</td>
-                                    <td>{new Date(complaint.submitted_at).toLocaleString('en-GB')}</td>
-                                    <td>{complaint.status}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </>
+                </div>
             )}
 
-            {userRole === 'Admin' && (
-                <table className="complaints-table">
-                    <thead>
-                        <tr>
-                            <th>Complaint ID</th>
-                            <th>Description</th>
-                            <th>Date Submitted</th>
-                            <th>Status</th>
-                            <th>User ID</th>
-                            <th>Location ID</th>
-                            <th>Assigned To</th>
-                            <th>Worker ID</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {complaints.map((complaint) => (
-                            <tr key={complaint.complaint_id}>
-                                <td>{complaint.complaint_id}</td>
-                                <td>{complaint.description}</td>
-                                <td>{new Date(complaint.submitted_at).toLocaleString('en-GB')}</td>
-                                <td>{complaint.status}</td>
-                                <td>{complaint.user_id}</td>
-                                <td>{complaint.location_id}</td>
-                                <td>
-                                    {complaint.assigned_to ? (
-                                        complaint.assigned_to
-                                    ) : (
-                                        <select
-                                            value=""
-                                            onChange={(e) => {
-                                                const selectedWorker = workers.find(w => w.name === e.target.value);
-                                                if (selectedWorker) {
-                                                    handleAssignWorker(complaint.complaint_id, selectedWorker);
-                                                }
-                                            }}
-                                        >
-                                            <option key="default-select" value="">Select Worker</option>
-                                            {workers.map((worker) => (
-                                                <option key={`worker-${worker.user_id}`} value={worker.name}>
-                                                    {worker.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    )}
-                                </td>
-                                <td>{complaint.worker_id || 'Not assigned'}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
+            <div className="complaints-grid">
+                {complaints.map((complaint) => (
+                    <ComplaintCard
+                        key={complaint.complaint_id}
+                        complaint={complaint}
+                        workers={workers}
+                        handleAssignWorker={handleAssignWorker}
+                        userRole={userRole}
+                    />
+                ))}
+            </div>
         </div>
     );
 };

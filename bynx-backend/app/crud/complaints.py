@@ -94,13 +94,13 @@ def update_complaint(complaint_id: int, complaint: ComplaintUpdate):
 
 def get_user_address(user_id: int) -> str:
     connection = get_mysql_connection()
-    cursor = connection.cursor()
+    cursor = connection.cursor(dictionary=True)
     cursor.execute("""
         SELECT l.address 
-        FROM Users u 
-        JOIN Location l ON u.location_id = l.location_id 
+        FROM Users u
+        JOIN Location l ON u.location_id = l.location_id
         WHERE u.user_id = %s
     """, (user_id,))
-    address = cursor.fetchone()
+    result = cursor.fetchone()
     connection.close()
-    return address[0] if address else None
+    return result['address'] if result else ''

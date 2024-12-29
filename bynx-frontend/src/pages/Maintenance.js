@@ -2,6 +2,39 @@ import React, { useState, useEffect } from 'react';
 import API from "../api/axios";
 import './Maintenance.css';
 
+const MaintenanceCard = ({ record, handleMarkAsCompleted, userRole }) => {
+    const formatDate = (date) => new Date(date).toLocaleString('en-GB');
+    
+    return (
+        <div className="maintenance-card">
+            <div className="maintenance-header">
+                <span className="maintenance-id">#{record.maintenance_id}</span>
+                <span className={`maintenance-status status-${record.status?.toLowerCase()}`}>
+                    {record.status || 'Pending'}
+                </span>
+            </div>
+            <div className="maintenance-body">
+                <p className="maintenance-details">{record.details}</p>
+                <div className="maintenance-meta">
+                    <div>Cost: ${record.cost}</div>
+                    <div>Vehicle: {record.vehicle_number || record.vehicle_id}</div>
+                    <div>Date: {record.maintenance_date ? formatDate(record.maintenance_date) : 'Pending'}</div>
+                </div>
+            </div>
+            {userRole === 'Admin' && record.status !== 'Completed' && (
+                <div className="maintenance-footer">
+                    <button 
+                        className="resolve-button"
+                        onClick={() => handleMarkAsCompleted(record.maintenance_id)}
+                    >
+                        Mark as Completed
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const Maintenance = () => {
     const [maintenanceRecords, setMaintenanceRecords] = useState([]);
     const [isMaintenanceFormVisible, setMaintenanceFormVisible] = useState(false);
@@ -15,6 +48,10 @@ const Maintenance = () => {
     const [error, setError] = useState(null);
     const userRole = localStorage.getItem('role');
 
+    useEffect(() => {
+        fetchMaintenanceRecords();
+    }, []);
+
     const fetchMaintenanceRecords = async () => {
         try {
             const response = await API.get("/maintenance");
@@ -26,10 +63,6 @@ const Maintenance = () => {
             setIsLoading(false);
         }
     };
-
-    useEffect(() => {
-        fetchMaintenanceRecords();
-    }, []);
 
     const handleMaintenanceSubmit = async (e) => {
         e.preventDefault();
@@ -55,6 +88,7 @@ const Maintenance = () => {
             }
         } catch (error) {
             setError('Failed to add maintenance record: ' + (error.response?.data?.detail || error.message));
+            setTimeout(() => setError(null), 3000);
         }
     };
 
@@ -70,24 +104,22 @@ const Maintenance = () => {
             }
         } catch (error) {
             setError('Failed to mark as completed: ' + (error.response?.data?.detail || error.message));
+            setTimeout(() => setError(null), 3000);
         }
     };
 
     if (isLoading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
+    if (error) return <div className="error-message">Error: {error}</div>;
 
-    // Rest of your component JSX remains the same
     return (
         <div className="maintenance">
             <h1>Maintenance Page</h1>
 
             {userRole === 'Worker' && (
                 <>
-                    <div className="section-header">
-                        <button className="add-button" onClick={() => setMaintenanceFormVisible(!isMaintenanceFormVisible)}>
-                            + Add Maintenance Request
-                        </button>
-                    </div>
+                    <button className="add-button" onClick={() => setMaintenanceFormVisible(!isMaintenanceFormVisible)}>
+                        + Add Maintenance Request
+                    </button>
 
                     {isMaintenanceFormVisible && (
                         <form className="maintenance-form" onSubmit={handleMaintenanceSubmit}>
@@ -115,74 +147,22 @@ const Maintenance = () => {
                                 onChange={(e) => setNewMaintenance({ ...newMaintenance, vehicle_id: e.target.value })} 
                                 required
                             />
-                            <button type="submit">Submit</button>
+                            <button type="submit" className="submit-button">Submit</button>
                         </form>
                     )}
-
-                    <table className="maintenance-table">
-                        <thead>
-                            <tr>
-                                <th>Maintenance ID</th>
-                                <th>Details</th>
-                                <th>Cost</th>
-                                <th>Vehicle Number</th>
-                                <th>Maintenance Date</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {maintenanceRecords.map((record) => (
-                                <tr key={record.maintenance_id}>
-                                    <td>{record.maintenance_id}</td>
-                                    <td>{record.details}</td>
-                                    <td>{record.cost}</td>
-                                    <td>{record.vehicle_number || record.vehicle_id}</td>
-                                    <td>{record.maintenance_date ? new Date(record.maintenance_date).toLocaleString('en-GB') : 'Pending'}</td>
-                                    <td className={`status ${record.status?.toLowerCase()}`}>{record.status || 'Pending'}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
                 </>
             )}
 
-            {userRole === 'Admin' && (
-                <table className="maintenance-table">
-                    <thead>
-                        <tr>
-                            <th>Maintenance ID</th>
-                            <th>Details</th>
-                            <th>Cost</th>
-                            <th>Vehicle Number</th>
-                            <th>Maintenance Date</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {maintenanceRecords.map((record) => (
-                            <tr key={record.maintenance_id}>
-                                <td>{record.maintenance_id}</td>
-                                <td>{record.details}</td>
-                                <td>{record.cost}</td>
-                                <td>{record.vehicle_number || record.vehicle_id}</td>
-                                <td>{record.maintenance_date ? new Date(record.maintenance_date).toLocaleString('en-GB') : 'Pending'}</td>
-                                <td className={`status ${record.status?.toLowerCase()}`}>{record.status || 'Pending'}</td>
-                                <td>
-                                    {record.status !== 'Completed' && (
-                                        <button 
-                                            className="complete-button"
-                                            onClick={() => handleMarkAsCompleted(record.maintenance_id)}
-                                        >
-                                            Mark as Completed
-                                        </button>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
+            <div className="maintenance-grid">
+                {maintenanceRecords.map((record) => (
+                    <MaintenanceCard
+                        key={record.maintenance_id}
+                        record={record}
+                        handleMarkAsCompleted={handleMarkAsCompleted}
+                        userRole={userRole}
+                    />
+                ))}
+            </div>
         </div>
     );
 };

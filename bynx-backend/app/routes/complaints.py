@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from app.schemas.complaints import ComplaintCreate, ComplaintUpdate, ComplaintResponse
-from app.crud.complaints import get_complaints, get_complaints_by_user, create_complaint, update_complaint
+from app.crud.complaints import get_complaints, get_complaints_by_user, create_complaint, update_complaint, get_user_address
 from app.auth.auth_handler import get_user_role
 from datetime import datetime
 
