@@ -1,47 +1,71 @@
 :root {
-  --navbar-bg-color: #0d47a1; /* Default Light Blue */
-  --navbar-text-color: #060606; /* Default Dark Blue */
-  --navbar-link-color: #000000; /* Default Dark Blue */
-  --navbar-link-hover-color: #1565c0; /* Default Medium Blue */
-  --navbar-button-bg-color: #4292d4; /* Default Dark Blue */
-  --navbar-button-text-color: #ffffff; /* Default White */
-  --navbar-button-hover-bg-color: #1565c0; /* Default Medium Blue */
-  --background-color: #0d48a13a; /* Default Light Blue Background */
-  --text-color: #000000; /* Default Dark Blue Text */
+  /* Common variables */
+  --border-radius: 8px;
+  --transition-speed: 0.3s;
+  
+  /* Light theme defaults */
+  --navbar-bg-color: #0d47a1;
+  --navbar-text-color: #060606;
+  --navbar-link-color: #000000;
+  --navbar-link-hover-color: #1565c0;
+  --navbar-button-bg-color: #4292d4;
+  --navbar-button-text-color: #ffffff;
+  --navbar-button-hover-bg-color: #1565c0;
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --card-bg: #ffffff;
+  --border-color: #e0e0e0;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --input-bg: #ffffff;
+  --primary: #1976d2;
+  --primary-dark: #1565c0;
+  --warning-bg: rgba(255, 152, 0, 0.1);
+  --warning-text: #f57c00;
+  --success-bg: rgba(76, 175, 80, 0.1);
+  --success-text: #388e3c;
+  --info-bg: rgba(33, 150, 243, 0.1);
+  --info-text: #1976d2;
 }
 
-.light-theme {
-  --navbar-bg-color: #0d47a1; /* Light Blue */
-  --navbar-text-color: #060606; /* Dark Blue */
-  --navbar-link-color: #000000; /* Dark Blue */
-  --navbar-link-hover-color: #1565c0; /* Medium Blue */
-  --navbar-button-bg-color: #4292d4; /* Dark Blue */
-  --navbar-button-text-color: #ffffff; /* White */
-  --navbar-button-hover-bg-color: #1565c0; /* Medium Blue */
-  --background-color: #0d48a13a; /* Light Blue Background */
-  --text-color: #000000; /* Dark Blue Text */
-}
-
-.dark-theme {
-  --navbar-bg-color: #0d47a1; /* Dark Blue */
-  --navbar-text-color: #bbdefb; /* Light Blue */
-  --navbar-link-color: #fafafa; /* Light Blue */
-  --navbar-link-hover-color: #e3f2fd; /* Lighter Blue */
-  --navbar-button-bg-color: #bbdefb; /* Light Blue */
-  --navbar-button-text-color: #0d47a1; /* Dark Blue */
-  --navbar-button-hover-bg-color: #00eaff; /* Lighter Blue */
-  --background-color: #080808; /* Dark Blue Background */
-  --text-color: #bbdefb; /* Light Blue Text */
+[data-theme='dark'] {
+  --navbar-bg-color: #1a1a1a;
+  --navbar-text-color: #ffffff;
+  --navbar-link-color: #ffffff;
+  --navbar-link-hover-color: #4292d4;
+  --navbar-button-bg-color: #4292d4;
+  --navbar-button-text-color: #ffffff;
+  --navbar-button-hover-bg-color: #1565c0;
+  --background-color: #121212;
+  --text-color: #ffffff;
+  --card-bg: #2a2a2a;
+  --border-color: #404040;
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --input-bg: #333333;
+  --primary: #4a90e2;
+  --primary-dark: #357abd;
+  --warning-bg: rgba(255, 152, 0, 0.2);
+  --warning-text: #ff9800;
+  --success-bg: rgba(76, 175, 80, 0.2);
+  --success-text: #4caf50;
+  --info-bg: rgba(33, 150, 243, 0.2);
+  --info-text: #2196f3;
 }
 
 body {
   background-color: var(--background-color);
   color: var(--text-color);
-  transition: all 0.50s linear;
+  transition: all 0.3s ease;
+  margin: 0;
+  padding: 0;
 }
 
 .App {
   text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .App-logo {
@@ -67,7 +91,7 @@ body {
 }
 
 .App-link {
-  color: #61dafb;
+  color: var(--primary);
 }
 
 @keyframes App-logo-spin {
@@ -92,4 +116,29 @@ body {
   .App-link {
     font-size: calc(8px + 2vmin);
   }
+}
+
+/* Ensure content takes full height */
+main {
+  flex: 1;
+  width: 100%;
+}
+
+/* Common utility classes */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
 }
