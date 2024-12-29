@@ -158,9 +158,12 @@ def insert_initial_data(connection):
         cursor.execute("""
         INSERT INTO Location (latitude, longitude, address)
         VALUES
-        (12.9716, 77.5946, 'Bangalore, India'),
-        (13.0827, 80.2707, 'Chennai, India'),
-        (19.0760, 72.8777, 'Mumbai, India')
+        (12.971600,	77.594600,	'Majestic'),
+        (12.978300,	77.640800,	'Malleshwaram'),
+        (13.029800,	77.544100,	'Hebbal'),
+        (12.9767, 77.6408, 'Indiranagar'),
+        (12.9299, 77.6848, 'HSR Layout'),
+        (12.978, 77.6055, 'MG Road')
         """)
 
     # Insert initial data for Users
@@ -182,9 +185,9 @@ def insert_initial_data(connection):
         cursor.execute("""
         INSERT INTO Vehicle (vehicle_number, capacity, last_maintenance, assigned_worker_id, location_id)
         VALUES
-        ('V001', 1000, NOW(), 2, 1),
-        ('V002', 1500, NOW(), 2, 2),
-        ('V003', 1200, NOW(), 2, 3)
+        ('V001', 1000, NOW(), 2, 4),
+        ('V002', 1500, NOW(), 2, 5),
+        ('V003', 1200, NOW(), 2, 6)
         """)
 
     # Insert initial data for WasteBin

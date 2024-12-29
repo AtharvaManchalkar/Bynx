@@ -1,130 +1,142 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import API from "../api/axios";
 import './CollectionRoutes.css';
+import truckIconUrl from '../components/truck.png';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import 'leaflet-routing-machine';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 
-let DefaultIcon = L.icon({
+const binIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow,
     iconSize: [25,41],
     iconAnchor: [12,41]
 });
-L.Marker.prototype.options.icon = DefaultIcon;
+
+const truckIcon = new L.Icon({
+    iconUrl: truckIconUrl,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+});
+
+
+
 
 const CollectionRoutes = () => {
-    const [bins, setBins] = useState([]);
+    const [collectionData, setCollectionData] = useState({ bins: [], vehicles: [] });
     const [routes, setRoutes] = useState([]);
-    const [showTruck, setShowTruck] = useState(false);
-    const [mapCenter, setMapCenter] = useState([12.9716, 77.5946]); // Bengaluru coordinates
-    const [mapZoom, setMapZoom] = useState(13);
+    const [showVehicles, setShowVehicles] = useState(true);
+    const [mapCenter] = useState([12.9716, 77.5946]); // Bengaluru coordinates
+    const [mapZoom] = useState(13);
     const [routingControl, setRoutingControl] = useState(null);
     const mapRef = useRef(null);
 
     useEffect(() => {
-        const fetchBins = async () => {
+        const fetchCollectionData = async () => {
             try {
-                const response = await API.get('/bins');
-                setBins(response.data.data);
+                const response = await API.get('/collection');
+                setCollectionData(response.data);
             } catch (error) {
-                console.error('Error fetching bins:', error);
+                console.error('Error fetching collection data:', error);
             }
         };
-    
-        fetchBins();
+        fetchCollectionData();
     }, []);
 
-    const handleAssignBins = () => {
-        const assignedRoutes = assignBinsToRoutes(bins);
-        setRoutes(assignedRoutes);
-        
-        if (mapRef.current) {
-            // Clear existing routes
-            if (routingControl) {
-                routingControl.forEach(control => control.remove());
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+    };
+
+    const assignOptimizedRoutes = () => {
+        const routes = collectionData.vehicles.map(vehicle => ({
+            vehicleId: vehicle.vehicle_id,
+            position: [vehicle.latitude, vehicle.longitude],
+            bins: []
+        }));
+
+        const priorityBins = [...collectionData.bins].sort((a, b) => b.current_level - a.current_level);
+
+        priorityBins.forEach(bin => {
+            let nearestVehicle = routes.reduce((nearest, route) => {
+                const distance = calculateDistance(
+                    bin.latitude,
+                    bin.longitude,
+                    route.position[0],
+                    route.position[1]
+                );
+                return (!nearest || distance < nearest.distance) 
+                    ? { route, distance }
+                    : nearest;
+            }, null);
+
+            if (nearestVehicle) {
+                nearestVehicle.route.bins.push(bin);
             }
-            
-            // Create new road-based routes
-            const newControls = assignedRoutes.map((route, index) => 
-                createRoadRoute(
-                    route, 
-                    mapRef.current, 
-                    index === 0 ? '#FF0000' : '#00FF00'
-                )
-            ).filter(Boolean);
-            
-            setRoutingControl(newControls);
+        });
+
+        setRoutes(routes);
+        displayRoutes(routes);
+    };
+
+    const createRoadRoute = (waypoints, map, color) => {
+        const control = L.Routing.control({
+            waypoints: waypoints,
+            routeWhileDragging: false,
+            lineOptions: {
+                styles: [{ color: color, weight: 4, opacity: 0.7 }]
+            },
+            addWaypoints: false,
+            draggableWaypoints: false,
+            fitSelectedRoutes: true,
+            showAlternatives: false
+        }).addTo(map);
+
+        return control;
+    };
+
+    const displayRoutes = (optimizedRoutes) => {
+        if (routingControl) {
+            routingControl.forEach(control => control.remove());
         }
+
+        const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#800080'];
+        const newControls = optimizedRoutes.map((route, index) => {
+            const waypoints = [
+                L.latLng(route.position[0], route.position[1]),
+                ...route.bins.map(bin => L.latLng(bin.latitude, bin.longitude))
+            ];
+            return createRoadRoute(waypoints, mapRef.current, colors[index % colors.length]);
+        });
+
+        setRoutingControl(newControls);
     };
-
-    const assignBinsToRoutes = (bins) => {
-        // Sort bins by fullness level
-        const sortedBins = [...bins].sort((a, b) => b.current_level - a.current_level);
-        
-        // Create two routes - one for urgent collections (fuller bins) and one for less urgent
-        const urgentRoute = sortedBins.filter(bin => bin.current_level > 70);
-        const normalRoute = sortedBins.filter(bin => bin.current_level <= 70);
-        
-        return [urgentRoute, normalRoute];
-    };
-
-    const toggleShowTruck = () => setShowTruck(!showTruck);
-
-    const truckIcon = new L.Icon({
-        iconUrl: 'https://example.com/truck-icon.png',
-        iconSize: [25, 25],
-    });
 
     const MapComponent = () => {
         const map = useMap();
-        
         useEffect(() => {
             if (map) {
                 mapRef.current = map;
                 map.invalidateSize();
             }
         }, [map]);
-        
         return null;
-    };
-
-    const createRoadRoute = (route, map, color) => {
-        const waypoints = route.map(bin => 
-            L.latLng(bin.location.latitude, bin.location.longitude)
-        );
-        
-        const control = L.Routing.control({
-            waypoints: waypoints,
-            routeWhileDragging: false,
-            lineOptions: {
-                styles: [{ color: color, weight: 4, opacity: 0.7 }],
-                zIndex: 1 // Set lower z-index for routes
-            },
-            addWaypoints: false,
-            draggableWaypoints: false,
-            fitSelectedRoutes: true,
-            showAlternatives: false
-        });
-    
-        control.on('routesfound', () => {
-            const routingContainer = document.querySelector('.leaflet-routing-container');
-            if (routingContainer) {
-                document.getElementById('routing-container').appendChild(routingContainer);
-            }
-        });
-    
-        return control.addTo(map);
     };
 
     return (
         <div className="collection-routes">
             <h1>Collection Routes</h1>
-
             <div className="main-content">
                 <div className="map-and-routes">
                     <div className="map-section">
@@ -140,25 +152,35 @@ const CollectionRoutes = () => {
                                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                 />
-                                {Array.isArray(bins) && bins.map((bin) => (
+                                {collectionData.bins.map((bin) => (
                                     <Marker 
                                         key={bin.bin_id} 
-                                        position={[bin.location.latitude, bin.location.longitude]}
-                                        zIndexOffset={1000} // Ensure markers stay on top
+                                        position={[bin.latitude, bin.longitude]}
+                                        icon={binIcon}
+                                        zIndexOffset={1000}
                                     >
                                         <Popup className="bin-popup">
                                             <div className="bin-info">
                                                 <h4>Bin Details</h4>
                                                 <p><strong>Bin ID:</strong> {bin.bin_id}</p>
                                                 <p><strong>Status:</strong> {bin.status}</p>
-                                                <p><strong>Capacity:</strong> {bin.capacity}L</p>
                                                 <p><strong>Current Level:</strong> {bin.current_level}%</p>
-                                                <div className="fill-level">
-                                                    <div style={{
-                                                        width: `${bin.current_level}%`,
-                                                        backgroundColor: bin.current_level > 70 ? '#ff4444' : '#44aa44'
-                                                    }}/>
-                                                </div>
+                                            </div>
+                                        </Popup>
+                                    </Marker>
+                                ))}
+                                {showVehicles && collectionData.vehicles.map((vehicle) => (
+                                    <Marker 
+                                        key={vehicle.vehicle_id}
+                                        position={[vehicle.latitude, vehicle.longitude]}
+                                        icon={truckIcon}
+                                        zIndexOffset={2000} // Ensures trucks appear above bin markers
+                                    >
+                                        <Popup className="vehicle-popup">
+                                            <div className="vehicle-info">
+                                                <h4>Vehicle {vehicle.vehicle_number}</h4>
+                                                <p><strong>Capacity:</strong> {vehicle.capacity}</p>
+                                                <p><strong>Last Maintenance:</strong> {new Date(vehicle.last_maintenance).toLocaleDateString()}</p>
                                             </div>
                                         </Popup>
                                     </Marker>
@@ -176,15 +198,24 @@ const CollectionRoutes = () => {
                     <h2>Control Panel</h2>
                     <div className="legend">
                         <h3>Legend</h3>
-                        <p style={{ color: "#FF0000" }}>Urgent Route (70% full)</p>
-                        <p style={{ color: "#00FF00" }}>Normal Route (≤70% full)</p>
+                        {routes.map((route, index) => (
+                            <p key={route.vehicleId}>
+                                Vehicle {route.vehicleId}: {route.bins.length} bins assigned
+                            </p>
+                        ))}
                     </div>
-                    <button onClick={handleAssignBins} className="control-button">Assign Bins to Trucks</button>
+                    <button onClick={assignOptimizedRoutes} className="control-button">
+                        Generate Optimized Routes
+                    </button>
                     <div className="toggle">
                         <label>
-                            Show Truck on Map:
-                            <input type="checkbox" checked={showTruck} onChange={toggleShowTruck} />
-                            <span className="toggle-label">{showTruck ? 'On' : 'Off'}</span>
+                            Show Vehicles:
+                            <input 
+                                type="checkbox" 
+                                checked={showVehicles} 
+                                onChange={() => setShowVehicles(!showVehicles)} 
+                            />
+                            <span className="toggle-label">{showVehicles ? 'On' : 'Off'}</span>
                         </label>
                     </div>
                 </div>

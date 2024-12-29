@@ -14,7 +14,7 @@ const SummaryMetrics = () => {
     useEffect(() => {
         const fetchMetrics = async () => {
             try {
-                const response = await API.get('/summary-metrics');
+                const response = await API.get('/summary');
                 setMetrics(response.data);
             } catch (error) {
                 console.error('Error fetching summary metrics:', error);

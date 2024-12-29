@@ -12,22 +12,22 @@ async def fetch_report_data(start_date: str = Query(None), end_date: str = Query
 
         # Fetch total waste collected over time
         query = """
-            SELECT DATE(last_collected) as date, SUM(current_level) as total_waste
-            FROM Bins
+            SELECT DATE(last_emptied) as date, SUM(current_level) as total_waste
+            FROM WasteBin
         """
         params = []
         if start_date and end_date:
-            query += " WHERE DATE(last_collected) BETWEEN %s AND %s"
+            query += " WHERE DATE(last_emptied) BETWEEN %s AND %s"
             params.extend([start_date, end_date])
-        query += " GROUP BY DATE(last_collected) ORDER BY DATE(last_collected)"
+        query += " GROUP BY DATE(last_emptied) ORDER BY DATE(last_emptied)"
         cursor.execute(query, params)
         waste_data = cursor.fetchall()
 
         # Fetch bin level trends
         cursor.execute("""
-            SELECT Locations.name as location, Bins.current_level
-            FROM Bins
-            JOIN Locations ON Bins.location_id = Locations.id
+            SELECT Location.address as location, WasteBin.current_level, WasteBin.type
+            FROM WasteBin
+            JOIN Location ON WasteBin.location_id = Location.location_id
         """)
         bin_data = cursor.fetchall()
 
