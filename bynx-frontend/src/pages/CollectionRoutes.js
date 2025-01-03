@@ -91,6 +91,12 @@ const CollectionRoutes = () => {
     };
 
     const createRoadRoute = (waypoints, map, color) => {
+        // Remove any existing routing containers
+        const existingContainer = document.querySelector('.leaflet-routing-container');
+        if (existingContainer) {
+            existingContainer.remove();
+        }
+    
         const control = L.Routing.control({
             waypoints: waypoints,
             routeWhileDragging: false,
@@ -100,11 +106,21 @@ const CollectionRoutes = () => {
             addWaypoints: false,
             draggableWaypoints: false,
             fitSelectedRoutes: true,
-            showAlternatives: false
+            showAlternatives: false,
+            show: false // Hide default container
         }).addTo(map);
-
+    
+        // Move routing instructions to our custom container
+        control.on('routesfound', function(e) {
+            const container = document.getElementById('routing-container');
+            const instructions = control.getContainer();
+            container.appendChild(instructions);
+        });
+    
         return control;
     };
+    
+    
 
     const displayRoutes = (optimizedRoutes) => {
         if (routingControl) {
