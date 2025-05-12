@@ -1,0 +1,93 @@
+name: CI/CD Pipeline - Bynx Fullstack
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  backend:
+    name: Backend (FastAPI) Workflow
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: bynx_db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+      mongo:
+        image: mongo:6
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    defaults:
+      run:
+        working-directory: bynx-backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Optional: Lint or test backend code
+      # - name: Run tests
+      #   run: |
+      #     pytest
+
+      - name: Check FastAPI app startup
+        run: |
+          uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 &
+          sleep 5
+          curl -f http://localhost:8000/docs
+
+  frontend:
+    name: Frontend (React) Workflow
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: bynx-frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint and Build
+        run: |
+          npm run build
+          
+      # Optional: Run frontend tests
+      # - name: Run tests
+      #   run: npm test
